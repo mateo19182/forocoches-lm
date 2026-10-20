@@ -40,6 +40,9 @@ h1, h2, h3 { margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
 .tabs .nav:hover { color: var(--accent); }
 .tabs .nav.on { color: var(--ink); border-bottom-color: var(--accent); }
 .status { font-size: 12px; text-align: right; }
+.gh { display: inline-flex; color: var(--ink); line-height: 0; }
+.gh svg { width: 22px; height: 22px; fill: currentColor; }
+.gh:hover { color: var(--accent); }
 
 /* ---- layout: content left, card column right */
 .page { max-width: 88rem; margin: 0 auto; padding: 1.75rem max(16px, env(safe-area-inset-right)) 5rem max(16px, env(safe-area-inset-left)); display: grid; grid-template-columns: minmax(0, 1fr) var(--side); gap: .75rem 1.5rem; align-content: start; }
