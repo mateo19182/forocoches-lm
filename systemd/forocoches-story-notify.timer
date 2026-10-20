@@ -1,0 +1,11 @@
+[Unit]
+Description=Check ForoCoches Telegram notifications every minute
+
+[Timer]
+OnBootSec=60
+OnUnitActiveSec=60
+AccuracySec=5
+Unit=forocoches-story-notify.service
+
+[Install]
+WantedBy=timers.target

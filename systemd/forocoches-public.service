@@ -1,0 +1,19 @@
+[Unit]
+Description=ForoCoches bounded public crawl
+StartLimitIntervalSec=900
+StartLimitBurst=3
+OnFailure=forocoches-public-health.service
+
+[Service]
+Type=simple
+WorkingDirectory=%h/projects/forocoches-lm
+ExecStart=%h/projects/forocoches-lm/.venv/bin/python -u %h/projects/forocoches-lm/public_crawl.py --data %h/projects/forocoches-lm/data/public-2026-10-16
+Restart=on-failure
+RestartSec=30
+TimeoutStopSec=100
+UMask=0077
+StandardOutput=append:%h/projects/forocoches-lm/data/public-2026-10-16/crawl.log
+StandardError=append:%h/projects/forocoches-lm/data/public-2026-10-16/crawl.log
+
+[Install]
+WantedBy=default.target

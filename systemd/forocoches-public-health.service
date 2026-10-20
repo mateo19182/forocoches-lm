@@ -1,0 +1,9 @@
+[Unit]
+Description=Check ForoCoches crawl progress and record stop alerts
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/projects/forocoches-lm
+ExecStart=%h/projects/forocoches-lm/.venv/bin/python %h/projects/forocoches-lm/monitor_crawl.py --data %h/projects/forocoches-lm/data/public-2026-10-16 --no-desktop
+TimeoutStartSec=20
+UMask=0077

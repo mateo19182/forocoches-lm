@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh unique ForoCoches export every fifteen minutes
+
+[Timer]
+OnBootSec=90
+OnUnitActiveSec=900
+Unit=forocoches-public-dedup.service
+
+[Install]
+WantedBy=timers.target

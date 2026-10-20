@@ -1,0 +1,9 @@
+[Unit]
+Description=Export unique long ForoCoches posts
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/projects/forocoches-lm
+ExecStart=%h/projects/forocoches-lm/.venv/bin/python %h/projects/forocoches-lm/dedup_public.py --data %h/projects/forocoches-lm/data/public-2026-10-16
+TimeoutStartSec=300
+UMask=0077

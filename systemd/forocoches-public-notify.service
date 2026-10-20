@@ -1,0 +1,9 @@
+[Unit]
+Description=Notify Telegram once when the current ForoCoches crawl stops
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/projects/forocoches-lm
+ExecStart=%h/projects/forocoches-lm/.venv/bin/python %h/projects/forocoches-lm/notify_crawl.py
+TimeoutStartSec=110
+UMask=0077

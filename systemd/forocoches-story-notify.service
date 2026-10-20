@@ -1,0 +1,10 @@
+[Unit]
+Description=Send ForoCoches crawl alerts and daily Telegram updates
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/projects/forocoches-lm
+ExecStart=%h/projects/forocoches-lm/.venv/bin/python %h/projects/forocoches-lm/notify_story_crawl.py --data %h/projects/forocoches-lm/data/stories-long-2026-10-19
+TimeoutStartSec=55
+UMask=0077
+

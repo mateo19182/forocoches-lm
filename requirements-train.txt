@@ -1,0 +1,9 @@
+# Versions observed in the CUDA training environment, 2026-10-19.
+-r requirements-data.txt
+torch==2.14.1
+transformers==5.17.0
+trl==1.15.0
+unsloth==2026.10.6
+accelerate==1.15.0
+bitsandbytes==0.50.2
+safetensors==0.8.0

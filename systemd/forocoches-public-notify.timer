@@ -1,0 +1,11 @@
+[Unit]
+Description=Watch current ForoCoches crawl for Telegram completion notification
+
+[Timer]
+OnBootSec=60
+OnUnitActiveSec=60
+AccuracySec=5
+Unit=forocoches-public-notify.service
+
+[Install]
+WantedBy=timers.target

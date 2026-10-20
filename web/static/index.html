@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>forocoches-lm</title>
+<meta name="description" content="Un modelo de lenguaje que escribe hilos de Forocoches. Generación en tu navegador.">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/static/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+<meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="bar">
+  <a class="mark" href="#">forocoches-lm</a>
+  <nav class="tabs">
+    <a class="nav" data-page="intro" href="#">Inicio</a>
+    <a class="nav" data-page="generar" href="#generar">Generar</a>
+    <a class="nav" data-page="archivo" href="#archivo">Archivo</a>
+  </nav>
+  <span class="grow"></span>
+  <span id="gpu" class="dim status"></span>
+</header>
+
+<!-- ============================================================ inicio -->
+<main id="page-intro" class="page grid" hidden>
+  <section class="card hero">
+    <h1>Un modelo que escribe hilos de Forocoches</h1>
+    <p class="lead">Gemma 3 1B con full fine-tune sobre medio millón de hilos del archivo histórico (2018–2019). Títulos, OPs y respuestas, con el tipo de hilo que le pidas.
+      La generación corre en tu navegador.</p>
+    <p class="ctas"><a class="pill solid" href="#generar">Generar un hilo</a></p>
+  </section>
+
+  <section class="cards">
+    <article class="card">
+      <h2>Datos</h2>
+      <p id="i-total" class="num"></p>
+      <p>Archivo público 2018–2019 (<a class="lnk" href="https://github.com/Atenrev/forocoches-language-generation">Atenrev/forocoches-language-generation</a>), hasta 30 posts por hilo.
+        Más scraping propio en 2026, que entra en la siguiente versión. Cada hilo lleva un tipo que el modelo aprende a seguir.</p>
+      <details class="fold">
+        <summary>Categorías</summary>
+        <table class="bars" id="i-tipos"></table>
+      </details>
+    </article>
+    <article class="card">
+      <h2>Método</h2>
+      <ol class="steps">
+        <li>HTML → texto plano: <code>TÍTULO</code>, <code>#n autor: texto</code>, citas <code>[cita=OP]…[/cita]</code>.</li>
+        <li>Tipo y calidad de cada hilo con <a class="lnk" href="https://www.anthropic.com/claude/haiku">Claude Haiku</a>, leyendo el OP.</li>
+        <li>Mix: historias ×2, resto ×1, compraventa fuera, 8% replay de español general (<a class="lnk" href="https://huggingface.co/datasets/HuggingFaceFW/fineweb-2">FineWeb-2</a>, spa_Latn).</li>
+        <li>Full fine-tune de <a class="lnk" href="https://huggingface.co/google/gemma-3-1b-pt">Gemma 3 1B pt</a> en una RTX 3090: packed rows de 4.096 tokens, completion-only loss, el tipo condiciona y no se predice. v1 270 M tokens / 14 h; v2 496 M / 26 h.</li>
+        <li>Eval: perplexity en hilos no vistos, y leer samples.</li>
+      </ol>
+    </article>
+    <article class="card wide two">
+      <div>
+        <h2>Loss</h2>
+        <p class="dim small">Loss por token: validation (gruesa) y training (fina, suavizada), frente a millones de tokens vistos. Cada versión sobre su propio validation set.</p>
+        <svg id="curves" class="curves" viewBox="0 0 720 240"></svg>
+        <p id="curves-legend" class="legend small"></p>
+      </div>
+      <div>
+        <h2>Resultados</h2>
+        <p class="dim small">Perplexity sobre 4.873 hilos del validation set. Menos es mejor.</p>
+        <table class="tbl">
+          <tr><th></th><th>base</th><th>v1</th><th>v2</th></tr>
+          <tr><td>todo el foro</td><td>11,11</td><td>7,08</td><td><b>6,81</b></td></tr>
+          <tr><td>historias</td><td>11,88</td><td>7,87</td><td><b>7,63</b></td></tr>
+          <tr><td>humor</td><td>12,53</td><td>6,60</td><td><b>6,40</b></td></tr>
+          <tr><td>debate</td><td>11,42</td><td>7,24</td><td><b>7,01</b></td></tr>
+          <tr><td>español general</td><td>13,19</td><td>12,82</td><td>13,03</td></tr>
+        </table>
+        <p class="dim small">Última fila: control, no pierde español general. v0 (52 M tokens) daba 7,65 en todo el foro.</p>
+      </div>
+    </article>
+    <article class="card wide links">
+      <h2>Enlaces</h2>
+      <p><b>Usado</b>
+        <a class="pill small" href="https://huggingface.co/google/gemma-3-1b-pt">Gemma 3 1B pt · modelo base</a>
+        <a class="pill small" href="https://github.com/Atenrev/forocoches-language-generation">Archivo FC 2018–2019 · dataset</a>
+        <a class="pill small" href="https://huggingface.co/datasets/HuggingFaceFW/fineweb-2">FineWeb-2 · replay</a>
+        <a class="pill small" href="https://github.com/mlc-ai/web-llm">WebLLM · inferencia</a>
+        <a class="pill small" href="https://huggingface.co/scratchyone/anon-1b">anon-1b · inspiración</a></p>
+      <p><b>Creado</b>
+        <a class="pill small solid" href="https://huggingface.co/mateo-19182/forocoches-lm-v2">forocoches-lm v2 · modelo</a>
+        <a class="pill small solid" href="https://huggingface.co/mateo-19182/forocoches-lm-v2-q4f16_1-MLC">v2 · pesos para navegador</a>
+        <a class="pill small solid" href="https://huggingface.co/mateo-19182/forocoches-threads-v2.1">forocoches-threads v2.1 · dataset</a>
+        <a class="pill small" href="https://huggingface.co/mateo-19182/forocoches-lm-v1-q4f16_1-MLC">v1 · pesos para navegador</a>
+        <a class="pill small" href="https://github.com/mateo19182/forocoches-lm">github · código</a></p>
+    </article>
+  </section>
+
+  <aside class="side">
+    <div class="card">
+      <h3>🔥 Trending</h3>
+      <p class="dim small">Hilos generados por el modelo y compartidos desde <a href="#generar">Generar</a></p>
+      <ol id="trend-gen" class="trend"></ol>
+    </div>
+    <div class="card">
+      <h3>📚 Del archivo</h3>
+      <p class="dim small">Hilos reales, al azar</p>
+      <ol id="trending" class="trend"></ol>
+      <a class="more" href="#archivo">Ver todos ›</a>
+    </div>
+  </aside>
+</main>
+
+<!-- ============================================================ generar -->
+<main id="page-generar" class="page grid" hidden>
+  <aside class="side">
+    <div class="card controls">
+      <div class="field"><span class="dim">modelo <span class="tip" tabindex="0">ⓘ<span class="tipbox">Pesos a 4 bits (575 MB), una descarga, caché. Corre con WebLLM sobre WebGPU: Chrome o Edge en escritorio, Safari en iOS 26, Chrome en Android. Nada sale de tu ordenador.<br><span id="i-gpu" class="gpucheck"></span></span></span></span><select id="model"></select>
+        <div id="dl" class="dl" hidden><div class="dl-bar"><i></i></div><span class="dl-text small"></span></div>
+        <span id="model-hint" class="dim small"></span>
+      </div>
+      <div class="fields">
+        <div class="field"><span class="dim">tipo</span><select id="tipo"></select></div>
+        <div class="field"><span class="dim">calidad</span><select id="calidad"></select></div>
+        <div class="field"><span class="dim">páginas</span><select id="paginas"></select></div>
+        <div class="field"><span class="dim">etiquetas</span><input id="etiquetas" placeholder="+hd +tocho"></div>
+      </div>
+
+      <div class="actions">
+        <button id="btn-thread" class="pill solid" type="button"><span>Generar hilo entero · <b id="nposts-lbl">8</b> posts</span></button>
+        <button id="btn-stop" class="btn stop" type="button" hidden>parar</button>
+        <button id="btn-title" class="btn" type="button">generar solo el título</button>
+        <button id="btn-auto" class="btn" type="button">siguiente post</button>
+        <button id="btn-forero" class="btn" type="button">responde un forero</button>
+        <button id="btn-op" class="btn" type="button">responde el OP</button>
+      </div>
+      <details class="sampling">
+        <summary class="dim">muestreo</summary>
+        <div class="sliders">
+          <label>posts por hilo <output id="nposts-out">8</output><input type="range" id="nposts" min="1" max="30" step="1" value="8"></label>
+          <label>temperature <output id="temp-out">0.8</output><input type="range" id="temp" min="0.3" max="1.5" step="0.05" value="0.8"></label>
+          <label>top_p <output id="topp-out">0.95</output><input type="range" id="topp" min="0.5" max="1" step="0.01" value="0.95"></label>
+          <label>repetition penalty <output id="rep-out">1.1</output><input type="range" id="rep" min="1" max="1.5" step="0.01" value="1.1"></label>
+          <label>max tokens por post <output id="maxnew-out">300</output><input type="range" id="maxnew" min="50" max="1000" step="10" value="300"></label>
+        </div>
+      </details>
+      <div class="actions row">
+        <button id="btn-undo" class="btn dim" type="button">deshacer</button>
+        <button id="btn-new" class="btn dim" type="button">nuevo hilo</button>
+      </div>
+
+      <form id="compose" class="compose">
+        <div id="quote" class="quote" hidden></div>
+        <textarea id="user-text" rows="3" placeholder="tu post…"></textarea>
+        <div class="segs" id="as-who"><button type="button" data-v="OP" class="on">como OP</button><button type="button" data-v="forero">como forero</button></div>
+        <div class="compose-row"><button type="submit" class="pill small">Publicar</button><span class="dim small">⌃⏎</span></div>
+      </form>
+      <div class="share" id="share" hidden><button id="btn-share" class="pill small" type="button">Compartir en Trending</button><span id="share-note"></span></div>
+    </div>
+  </aside>
+
+  <article class="doc">
+    <div class="card titleline">
+      <textarea id="title" rows="1" placeholder="Escribe un título, o deja que lo escriba el modelo" autocomplete="off"></textarea>
+      <span class="pages">«&nbsp;&nbsp;&nbsp;‹&nbsp;&nbsp;&nbsp;<b>1</b>&nbsp;&nbsp;&nbsp;›&nbsp;&nbsp;&nbsp;»</span>
+    </div>
+    <ol id="posts" class="posts"></ol>
+  </article>
+</main>
+
+<!-- ============================================================ archivo -->
+<main id="page-archivo" class="page grid" hidden>
+  <aside id="b-filters" class="side">
+    <div class="card controls">
+      <input id="b-q" class="search" placeholder="Buscar en los títulos" autocomplete="off">
+      <div class="segs col" id="f-tipo"></div>
+      <div class="segs col" id="f-calidad"></div>
+      <button id="b-random" class="btn dim" type="button">otros al azar</button>
+    </div>
+  </aside>
+  <ol id="b-list" class="rows card"></ol>
+
+  <article id="b-view" class="doc" hidden>
+    <div class="viewhead">
+      <a id="b-back" href="#archivo" class="dim">‹ archivo</a>
+      <span id="b-meta" class="dim small meta"></span>
+      <span class="grow"></span>
+      <button id="b-play" class="pill solid small" type="button">Continuar con el modelo</button>
+    </div>
+    <div class="card titleline"><h1 id="b-title"></h1><span class="pages">«&nbsp;&nbsp;&nbsp;‹&nbsp;&nbsp;&nbsp;<b>1</b>&nbsp;&nbsp;&nbsp;›&nbsp;&nbsp;&nbsp;»</span></div>
+    <ol id="b-posts" class="posts"></ol>
+  </article>
+
+  <section id="stats" class="card stats">
+    <p id="s-total" class="lede"></p>
+    <h2>hilos por tipo <span class="dim">y calidad de la etiqueta</span></h2>
+    <table class="bars" id="s-tipos"></table>
+    <p class="dim small legend"><i class="sw a"></i> alta <i class="sw m"></i> media <i class="sw b"></i> baja</p>
+    <h2>tokens de entrenamiento <span class="segs" id="s-mix-tabs"></span></h2>
+    <table class="bars" id="s-mix"></table>
+    <p id="s-mix-note" class="dim small"></p>
+    <h2>posts por hilo</h2>
+    <svg id="s-hist" class="hist" viewBox="0 0 600 140" preserveAspectRatio="none"></svg>
+    <h2>páginas por hilo</h2>
+    <table class="bars" id="s-pages"></table>
+  </section>
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

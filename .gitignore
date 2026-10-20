@@ -1,0 +1,37 @@
+.env
+.venv/
+data/
+__pycache__/
+/secrets/
+.venv-*/
+web/static/vendor/
+
+# Local artifacts; publish models and datasets separately on Hugging Face.
+.env.*
+!.env.example
+/runs/
+/build/
+/unsloth_compiled_cache/
+/samples/
+*.log
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.db
+*.db-*
+*.jsonl
+*.parquet
+*.safetensors
+*.pt
+*.pth
+*.bin
+*.pem
+*.key
+.pytest_cache/
+*.egg-info/
+
+# Internal working notes, kept local
+/HANDOFF.md
+/AGENTS.md
+/docs/OPERATIONS-HISTORY.md
+/docs/NOVEL-PILOT.md

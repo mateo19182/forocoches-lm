@@ -1,0 +1,607 @@
+[
+  {
+    "thread_id": 1979428,
+    "title": "Recopilación historias y relatos",
+    "kind": "story_index",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=1979428",
+    "reason": "Opening post lists forum stories and invites additions."
+  },
+  {
+    "thread_id": 4263976,
+    "title": "Recopilación de historias-relatos de foreros",
+    "kind": "story_index",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=4263976",
+    "reason": "Opening post links stories written by forum users."
+  },
+  {
+    "thread_id": 6374333,
+    "title": "La biblioteca forocochera [Tema serio]",
+    "kind": "story_index",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=6374333",
+    "reason": "Search-indexed page describes an index of forum fiction with titles, authors and links; public accessibility will be checked by the worker."
+  },
+  {
+    "thread_id": 9471856,
+    "title": "Busco forero o hilos con sus relatos +ayuda",
+    "kind": "index_pointer",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=9471856",
+    "reason": "Reply 6 links an author's story index."
+  },
+  {
+    "thread_id": 9357210,
+    "title": null,
+    "kind": "author_index_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=9471856",
+    "reason": "Target linked by the author in reply 6 as an index of stories; content will be checked by the worker."
+  },
+  {
+    "thread_id": 6475005,
+    "title": "La inmobiliaria, los subnormales y el pago en B +tocho.",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=6475005",
+    "reason": "Search result shows a first-person long opener; extraction and length still require verification."
+  },
+  {
+    "thread_id": 6500723,
+    "title": "Soy super CELOSO, DESCONFIADO, PARANOICO, lo que queráis... +ayuda +tema serio +tocho",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=6500723",
+    "reason": "Search result shows a first-person long opener; extraction and length still require verification."
+  },
+  {
+    "thread_id": 3844612,
+    "title": "Quiero añadir el caso de T_D_S P_T_S que me cambió",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=3844612",
+    "reason": "Search result shows a first-person long opener; extraction and length still require verification."
+  },
+  {
+    "thread_id": 10403190,
+    "title": "Comportamiento esquivo, se avecina posible liana",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10403190",
+    "reason": "Search result shows a first-person long opener; extraction and length still require verification."
+  },
+  {
+    "thread_id": 10399556,
+    "title": "Historia de un viaje con un abuelo: VW Passat 3900 kms por delante... (tocho inside)",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10399556",
+    "reason": "Search result shows a first-person long opener; extraction and length still require verification."
+  },
+  {
+    "thread_id": 10389071,
+    "title": "Llorar o reir, una más para la colección. +Tocho +Serio",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10389071",
+    "reason": "Search result shows a first-person long opener; extraction and length still require verification."
+  },
+  {
+    "thread_id": 10495457,
+    "title": "Problema con wallapop +temaserio",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10495457",
+    "reason": "Search result shows a first-person long opener; extraction and length still require verification."
+  },
+  {
+    "thread_id": 6589050,
+    "title": "Recopilación Hilos míticos Tito Chuck",
+    "kind": "story_index",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=6589050",
+    "reason": "Search-indexed author compilation links his own threads."
+  },
+  {
+    "thread_id": 3249391,
+    "title": "Recopilación de hilos interesantes",
+    "kind": "story_index",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=3249391",
+    "reason": "Search-indexed compilation explicitly collects interesting forum threads; mixed topics require later filtering."
+  },
+  {
+    "thread_id": 1788617,
+    "title": "Recopilemos hilos de historias con PAINTS",
+    "kind": "story_index",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=1788617",
+    "reason": "Search-indexed compilation links illustrated forum stories; text quality remains unverified."
+  },
+  {
+    "thread_id": 10500825,
+    "title": "Estoy muy triste, me gustaría saber vuestra opinión +[SERIO][TOCHO]",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10500825",
+    "reason": "Search-indexed October 2025 opener describes a personal experience with friends."
+  },
+  {
+    "thread_id": 10235763,
+    "title": "He tenido sueños lucidos toda mi vida y respondo preguntas",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10235763",
+    "reason": "Search-indexed January 2025 opener describes personal experiences and invites discussion."
+  },
+  {
+    "thread_id": 10376178,
+    "title": "He aprobado el práctico de conducir!!! +Tocho",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10376178",
+    "reason": "Search-indexed June 2025 personal-experience candidate; length and quality remain unverified."
+  },
+  {
+    "thread_id": 10413616,
+    "title": "Mi hermano el casa papis (tocho)",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10413616",
+    "reason": "Search-indexed July 2025 family-experience candidate; length and quality remain unverified."
+  },
+  {
+    "thread_id": 1528602,
+    "title": "Recopilación de Hilos del año 2009",
+    "kind": "story_index",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=1528602",
+    "reason": "Search-indexed compilation with thread references.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 3492211,
+    "title": "Mejores hilos de 2013. RECOPILACION",
+    "kind": "story_index",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=3492211",
+    "reason": "Search-indexed compilation with thread references.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 2530994,
+    "title": "Hilo recopilación de hilos míticos o mortalmente graciosos",
+    "kind": "story_index",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=2530994",
+    "reason": "Search-indexed compilation with thread references.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 2573547,
+    "title": "Os presento mi carpeta de Hilos Míticos de Forocoches",
+    "kind": "story_index",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=2573547",
+    "reason": "Search-indexed compilation with thread references.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 2689967,
+    "title": "Historias Forocochiles [Recopilemos]",
+    "kind": "story_index",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=2689967",
+    "reason": "Search-indexed compilation with thread references.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 2268277,
+    "title": "Recopilacion Respondere a vuestras preguntas",
+    "kind": "story_index",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=2268277",
+    "reason": "Search-indexed compilation with thread references.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 9996748,
+    "title": "Me he BLANQUEADO los DIENTES, os cuento mi experiencia +tocho",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=9996748",
+    "reason": "Search-indexed first-person experience; length, originality and public access require collector verification.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 9947219,
+    "title": "Os cuento mi historia de pringado en el sector de la automoción",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=9947219",
+    "reason": "Search-indexed first-person experience; length, originality and public access require collector verification.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 9923407,
+    "title": "¿Dejar trabajo admón publica? Tocho. + tema serio",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=9923407",
+    "reason": "Search-indexed first-person experience; length, originality and public access require collector verification.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 10765424,
+    "title": "Problema con vecino yonki - aire acondicionado",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10765424",
+    "reason": "Search-indexed first-person experience; length, originality and public access require collector verification.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 3060400,
+    "title": "Recopilatorio - Historias T_D_S P_T_S - Vol 1",
+    "kind": "story_index",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=3060400",
+    "reason": "Search-indexed opener dated 2012-12-23 explicitly compiles user relationship stories and lists four titles with authors; search output exposes a story hyperlink. Strong story-discovery index. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 5371365,
+    "title": "[Recopilatorio]GRAN HILO UTIL DE FOROCOCHEROS",
+    "kind": "story_index",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=5371365",
+    "reason": "Search-indexed mixed-topic compilation lists threads by category. A search-indexed reply in thread 10214041 explicitly links this ID and identifies its Forocoches en sí mismo section as a compilation of classic threads. Filter non-story topics. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 2566648,
+    "title": "Hilos interesantes en forocoches VOL I",
+    "kind": "story_index",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=2566648",
+    "reason": "Search-indexed compilation contains numerous named threads and explicitly proposes a historias forococheras category. Mixed cultural and technical material requires filtering; lower priority than dedicated story indexes. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 9548767,
+    "title": "[RECOPILATORIO] Mis HILOS MUSICALES - HISTORIAS, VERSIONES Y MASTERINGS sobre MÚSICA",
+    "kind": "author_index_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=9548767",
+    "reason": "Search-indexed May 2023 replies identify LoOwdd as the author and describe this as a navigation thread for his other threads. Music-focused author index, not verified as a personal-story index; outgoing link targets were not exposed in the returned excerpt. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 10786195,
+    "title": "OS CUENTO mi finde con AMIGAS. No he podido ni forear…",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php/showthread.php?page=2&t=10786195",
+    "reason": "Search-indexed page 2 dated 2026-08-24 contains the quoted first-person narrative in reply 49: friends visiting Madrid, outings, dancing, a hotel and their departure. Substantial narrative visible through a quotation; original opener not directly checked. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 10768705,
+    "title": "24 años y virgen ¿Qué puedo hacer? +Shuras +Tema Serio",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10768705",
+    "reason": "Search-indexed text dated 2026-08-06 contains an extended first-person account of social life, repeated dating attempts and their emotional effects, with an author update. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 10733842,
+    "title": "Duda sobre independencia tras divorcio de mis padres (Tema serio)",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10733842",
+    "reason": "Search-indexed replies dated 2026-07-06 show the author discussing his parents divorce, helping his mother and moving toward independence. Personal family narrative candidate; opener length remains unverified. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 10652867,
+    "title": "Ruptura de relación +desahogo +Tocho +Tema Serio",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10652867",
+    "reason": "Search-indexed opener dated 2026-04-09 recounts a year-long relationship and breakup, with concrete incidents and a 2026-04-13 update about the first week afterward. Strong extended first-person candidate. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 10626688,
+    "title": "35 años y no encuentro sentido a la vida",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10626688",
+    "reason": "Search-indexed replies dated 2026-03-09 quote the first-person opener about being 35, work, home ownership and feeling emotionally stuck. Reflective autobiographical candidate; full opener length unverified. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 10579075,
+    "title": "Carnet A2 automático",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10579075",
+    "reason": "Search-indexed text dated 2026-01-17 explicitly warns of a long post and describes the authors lack of manual-motorcycle experience, anxiety and search for an automatic A2 driving school in Murcia. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 10349999,
+    "title": "Mi experiencia con KEIO",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10349999",
+    "reason": "Search-indexed opener dated 2025-05-21 announces a long account and narrates the authors subscription, installation and mobile-porting experience with concrete dates and prices. Personal consumer-experience narrative. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 10312594,
+    "title": "Alucino con el cambio laboral que me quieren hacer... [Tema Serio]",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10312594",
+    "reason": "Search-indexed opener dated 2025-04-13 gives first-person background on specialist technical work, travel and long hours before describing a proposed workplace change. Author explicitly says the final summary uses ChatGPT; separate that summary during extraction. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 10309728,
+    "title": "Campmany abogados +TemaSerio +Discapacidad +Desahogo +Tocho",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10309728",
+    "reason": "Search-indexed opener dated 2025-04-10 contains a long first-person chronology of illness, work limitations and seeking legal assistance. Treat service-related statements as the authors account, not independently established facts. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 10225319,
+    "title": "Descontento con mi autoescuela - Carnet A2 + tocho",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10225319",
+    "reason": "Search-indexed opener dated 2025-01-17 recounts repeated motorcycle lessons, an exam attempt, scheduling problems and specific interactions with instructors. Substantial first-person sequence visible. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 10216656,
+    "title": "Mi coche huele a mierda",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=10216656",
+    "reason": "Search-indexed text dated 2025-01-09 narrates a vehicle breakdown, clutch replacement and persistent smell over two months. First-person incident narrative; exact opener length unverified. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 9909799,
+    "title": "Reclamación por negligencia médica - Tema serio",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=9909799",
+    "reason": "Search-indexed opener dated 2024-03-28 explicitly introduces a long chronological personal account of a leg operation, with dated appointments beginning in September 2023. Strong narrative candidate; allegations remain the authors claims. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 9901457,
+    "title": "Presentación Yamaha R1 RN19",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=9901457",
+    "reason": "Search-indexed opener dated 2024-03-21 announces a long narrative and recounts the authors history with motorcycles, successive purchases and a sale leading into the R1 purchase story. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 9865056,
+    "title": "15 años en la música 10 de depresión y ayer salió mi primer single +RespondoPreguntas",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=9865056",
+    "reason": "Search-indexed February 2024 discussion quotes an extended autobiographical account of music production, depression, returning to composition in 2020 and completing an album in 2024. Narrative followed by advice; separate the sections if needed. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 9953601,
+    "title": "Cronología de mi primero viaje en moto en solitario",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=9953601",
+    "reason": "Search-indexed author replies dated 2024-05-07 describe solo travel, a camper-converted car and loading camping equipment onto a 125cc motorcycle. Title and replies support a personal travel narrative; opener length unverified. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 9478894,
+    "title": "Así es como perdí casi 10K haciendo trading +tocho +serio",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=9478894",
+    "reason": "Search-indexed opener dated 2023-03-16 provides an extended first-person chronology from small cryptocurrency purchases to leveraged trading, sleeplessness and losses over three months. Strong personal narrative candidate. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 9183678,
+    "title": "Mi recopilatorio de anecdotas paranormales",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=9183678",
+    "reason": "Search-indexed opener dated 2022-07-29 compiles the authors own experiences in chronological order and invites further anecdotes. Substantial narrative text is visible; this is an in-thread story collection, not a verified outgoing-link index. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 9124113,
+    "title": "[RECOPILATORIO] Pirulas-burradas de los Cabify-Uber",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=9124113",
+    "reason": "Search-indexed opener dated 2022-06-12 narrates the authors ride after a night out and invites other users to contribute experiences. Five-page in-thread anecdote collection; no outgoing-story-link index verified. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 8819779,
+    "title": "Mi padre cree que se va a morir +serio +tocho",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=8819779",
+    "reason": "Search-indexed opener dated 2021-10-23 gives first-person family context, the fathers daily routine, an earlier depression and bereavement, followed by author replies. Personal family-experience candidate. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 8216108,
+    "title": "DIARIO DE UN MERCEDES SLK r170 1999 +impresiones +fotos +tocho",
+    "kind": "story_candidate",
+    "evidence": "https://forocoches.com/foro/showthread.php?t=8216108",
+    "reason": "Search-indexed opener dated 2020-10-07 recounts switching from an MX5 to an SLK after two years of ownership and spending. It includes links to earlier ownership and purchase stories, but their truncated target IDs were not inferred. Mixed diary and vehicle-comparison content. Evidence obtained via web search only; current unauthenticated access and extracted word count not checked.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 4301375,
+    "title": "https://m.forocoches.com/foro/showth...375&highlight=",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7047964",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 4293061,
+    "title": "https://m.forocoches.com/foro/showth...061&highlight=",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7047964",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 5603353,
+    "title": "https://m.forocoches.com/foro/showth...353&highlight=",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7047964",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 5117939,
+    "title": "https://m.forocoches.com/foro/showth...939&highlight=",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7047964",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 5609643,
+    "title": "https://m.forocoches.com/foro/showth...643&highlight=",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7047964",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 4989553,
+    "title": "https://www.forocoches.com/foro/show....php?t=4989553",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7442087",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 1757582,
+    "title": "https://www.forocoches.com/foro/show...7582&highlight",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 1790718,
+    "title": "https://www.forocoches.com/foro/show....php?t=1790718",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 6415343,
+    "title": "https://m.forocoches.com/foro/showthread.php?t=6415343",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 5376381,
+    "title": "https://m.forocoches.com/foro/showthread.php?t=5376381",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 5404877,
+    "title": "https://m.forocoches.com/foro/showthread.php?t=5404877",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 5403583,
+    "title": "https://www.forocoches.com/foro/show....php?t=5403583",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 6287952,
+    "title": "https://www.forocoches.com/foro/show....php?t=6287952",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 6078710,
+    "title": "https://m.forocoches.com/foro/showthread.php?t=6078710",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 5570521,
+    "title": "https://www.forocoches.com/foro/show....php?t=5570521",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 4969538,
+    "title": "https://m.forocoches.com/foro/showthread.php?t=4969538",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 5645501,
+    "title": "https://www.forocoches.com/foro/show....php?t=5645501",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 5300646,
+    "title": "https://m.forocoches.com/foro/showthread.php?t=5300646",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 3132010,
+    "title": "https://www.forocoches.com/foro/show....php?t=3132010",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 5459527,
+    "title": "https://www.forocoches.com/foro/show....php?t=5459527",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 6522030,
+    "title": "https://m.forocoches.com/foro/showthread.php?t=6522030",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 5229072,
+    "title": "https://m.forocoches.com/foro/showthread.php?t=5229072",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 211782,
+    "title": "https://www.forocoches.com/foro/showthread.php?t=211782",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 4926570,
+    "title": "que os parece mi shurpizza casera https://m.forocoches.com/foro/showth...ight=shurpizza",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  },
+  {
+    "thread_id": 1924378,
+    "title": "https://m.forocoches.com/foro/showth...ight=shurpizza",
+    "kind": "story_candidate",
+    "evidence": "archive-index:7614501",
+    "reason": "Outside-range link extracted offline from a saved archive story index; public accessibility and story quality unverified.",
+    "discovered_at": "2026-10-19"
+  }
+]

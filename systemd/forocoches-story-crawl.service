@@ -1,0 +1,22 @@
+[Unit]
+Description=ForoCoches complete oldest-first AirVPN scan
+StartLimitIntervalSec=900
+StartLimitBurst=3
+OnFailure=forocoches-story-health.service
+
+[Service]
+Type=simple
+WorkingDirectory=%h/projects/forocoches-lm
+ExecStartPre=/usr/bin/docker exec slskd-vpn test -d /sys/class/net/tun0
+ExecStart=/usr/bin/docker run --rm --init --name forocoches-collector --network container:slskd-vpn --user 1000:1000 --cap-drop ALL --security-opt no-new-privileges --read-only --tmpfs /tmp:rw,nosuid,nodev,size=512m -v %h/projects/forocoches-lm:/workspace -v %h/.cache/forocoches-lm:/host-lock -v /mnt/data/forocoches-lm:/mnt/data/forocoches-lm -e FC_HOST_LOCK=/host-lock/collector.lock -e FC_NETWORK_ROUTE=airvpn -e FC_WORKER_CONTAINER=forocoches-collector forocoches-collector:local python public_crawl.py --data data/stories-long-2026-10-19 --cookies secrets/private-session-2026-10-19.cookies --posts-per-page 30 --target-posts 500000 --novel-pilot --stories-only --candidate-limit 12000000 --workers 16 --parser-workers 4 --delay 0.028571428572 --max-attempts 12000000 --max-body-mb 2500000 --max-discovered-pages 12000000 --hours 720 --scan-start 1 --scan-end 10841474 --complete-id-scan --include-archive-ids --first-pages-only --min-own-chars 2000 --min-free-gb 15
+ExecStop=-/usr/bin/docker stop --timeout 110 forocoches-collector
+Restart=on-failure
+RestartSec=30
+TimeoutStopSec=120
+Nice=10
+UMask=0077
+StandardOutput=append:%h/projects/forocoches-lm/data/stories-long-2026-10-19/crawl.log
+StandardError=append:%h/projects/forocoches-lm/data/stories-long-2026-10-19/crawl.log
+
+[Install]
+WantedBy=default.target
