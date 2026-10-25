@@ -1,0 +1,31 @@
+# forocoches.m19182.dev (Cloudflare tunnel -> 127.0.0.1:7862) + tailnet.
+#   docker compose -f deploy/web/compose.yaml up -d --build
+# Code is mounted, not baked: after editing web/, `docker compose -f deploy/web/compose.yaml restart`.
+name: forocoches-web
+services:
+  web:
+    build: .
+    image: forocoches-web:local
+    container_name: forocoches-web
+    restart: unless-stopped
+    network_mode: bridge  # docker's address pools are exhausted on this host; no per-project network
+    user: "1000:1000"
+    read_only: true
+    tmpfs: ["/tmp:exec,mode=1777"]  # exec: triton loads the launcher it compiles into ~/.triton (HOME=/tmp)
+    ports:
+      - "127.0.0.1:7862:7862"
+      - "100.83.166.6:7862:7862"
+    volumes:
+      - ../../web:/app/web:ro
+      - ../../runs:/app/runs:ro            # runs/*/final weights + loss curves
+      - ../../data/mix:/app/data/mix:ro    # mix summaries for /api/stats
+      - ../../data/web:/app/data/web       # index.sqlite (opened ro), mlc/, generated.sqlite (written)
+      - ${HOME}/.cache/huggingface:/hf     # "base" model is fetched from the Hub on first use
+    # GPU only for /api/generate (Tailscale-only); models load lazily and unload after 10 min idle
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["0"]
+              capabilities: [gpu]

@@ -1,0 +1,8 @@
+# web/app.py runtime, pinned to what .venv-train ran under systemd (2026-10-25)
+torch==2.14.1
+transformers==5.17.0
+safetensors==0.8.0
+tokenizers==0.23.3
+sentencepiece==0.2.2
+fastapi==0.143.3
+uvicorn==0.54.0
