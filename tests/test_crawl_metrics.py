@@ -5,6 +5,7 @@ from pathlib import Path
 import tempfile
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 import collect
 import crawl_metrics
@@ -13,6 +14,27 @@ from test_collect import HTML,URL
 
 
 class CounterTests(unittest.TestCase):
+    def test_persisted_server_backoff_survives_network_health_checks(self):
+        settings={'complete_id_scan':True,'max_attempts':100,'deadline':1000,'max_body_bytes':100000}
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            with collect.connect(root) as db:
+                public_crawl.setup(db)
+                public_crawl.id_scan.configure(db,1,10)
+                db.executemany('INSERT INTO public_config VALUES(?,?)',[(k,json.dumps(v)) for k,v in settings.items()])
+                collect.enqueue(db,[URL])
+                db.execute("UPDATE pages SET due=550,status=503,error='Server error'")
+                db.execute('INSERT INTO fetch_events(url,status,body_bytes,fetched_at) VALUES(?,503,0,200)',(URL,))
+                with patch('public_crawl.time.time',return_value=500),patch('public_crawl.RUN_STARTED_AT',100):
+                    report=public_crawl.progress(db,root,'running')
+                self.assertEqual(report['next_request_due_at'],550)
+                self.assertEqual(report['pending_retry_error'],'Server error')
+                self.assertEqual(report['pending_retry_http_status'],503)
+                self.assertEqual(report['last_fetch_status'],503)
+                self.assertIsNone(public_crawl.stop_reason(report,settings,now=500))
+                self.assertIsNone(public_crawl.stop_reason(report,settings,now=551))
+                self.assertEqual(public_crawl.stop_reason(report,settings,now=611),'network_unavailable')
+
     def test_disconnected_vpn_stops_requests_and_gives_a_fresh_run_grace(self):
         settings={'max_attempts':100,'deadline':1000,'max_body_bytes':100000}
         report={'posts':0,'attempts':10,'saved_response_bytes':0,'pages':{},'listing_pages':{},

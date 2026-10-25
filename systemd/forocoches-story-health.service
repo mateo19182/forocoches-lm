@@ -4,6 +4,6 @@ Description=Check the story-focused ForoCoches crawl
 [Service]
 Type=oneshot
 WorkingDirectory=%h/projects/forocoches-lm
-ExecStart=%h/projects/forocoches-lm/.venv/bin/python %h/projects/forocoches-lm/monitor_crawl.py --data %h/projects/forocoches-lm/data/stories-long-2026-10-19 --no-desktop
+ExecStart=%h/projects/forocoches-lm/.venv/bin/python %h/projects/forocoches-lm/monitor_crawl.py --data %h/projects/forocoches-lm/data/stories-long-2026-10-19 --no-desktop --wake-thread
 TimeoutStartSec=20
 UMask=0077

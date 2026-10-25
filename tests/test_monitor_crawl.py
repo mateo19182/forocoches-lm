@@ -8,6 +8,26 @@ from unittest.mock import patch
 from monitor_crawl import assess,check,worker_alive
 
 class MonitorTests(unittest.TestCase):
+    def test_scheduled_server_retry_does_not_look_like_a_network_outage(self):
+        status={'state':'running','updated_at':500,'route':'airvpn','network_ready':True,
+                'run_started_at':100,'last_http_response_at':200,'next_request_due_at':550,
+                'pending_retry_error':'Server error','pending_retry_http_status':503,'last_fetch_status':503}
+        self.assertEqual(assess(status,True,500)[0],'healthy')
+        status['last_fetch_status']=None
+        self.assertEqual(assess(status,True,500)[0],'network_unavailable')
+        status['last_fetch_status']=503
+        status['next_request_due_at']=490
+        self.assertEqual(assess(status,True,500)[0],'healthy')
+        status['next_request_due_at']=550
+        status['pending_retry_error']='ConnectionError'
+        self.assertEqual(assess(status,True,500)[0],'network_unavailable')
+        status['pending_retry_error']='Server error'
+        status['next_request_due_at']=300
+        self.assertEqual(assess(status,True,500)[0],'network_unavailable')
+        status['next_request_due_at']=550
+        status['network_ready']=False
+        self.assertEqual(assess(status,True,500)[0],'network_unavailable')
+
     def test_disconnected_vpn_is_unhealthy_despite_fresh_heartbeat(self):
         status={'state':'running','updated_at':500,'route':'airvpn','network_ready':False}
         self.assertEqual(assess(status,True,500)[0],'network_unavailable')

@@ -10,6 +10,14 @@ import time
 def network_problem(status, now):
     if status.get('route')=='airvpn' and status.get('network_ready') is False:
         return 'VPN tunnel disappeared from the collector network namespace'
+    retry_due=status.get('next_request_due_at')
+    retry_status=status.get('pending_retry_http_status')
+    last_status=status.get('last_fetch_status')
+    # Server backoff is intentional silence; allow one request timeout after it expires.
+    if (isinstance(last_status,int) and 500<=last_status<600
+            and status.get('pending_retry_error')=='Server error' and isinstance(retry_status,int)
+            and 500<=retry_status<600 and retry_due is not None and now<retry_due+60):
+        return None
     last_response=max(status.get('last_http_response_at') or 0,status.get('run_started_at',now))
     if now-last_response>180:
         return 'No HTTP responses for more than three minutes'
@@ -45,7 +53,7 @@ def worker_alive(pid,container=None):
     except (OSError,ValueError,TypeError):return False
 
 
-def check(root, desktop=True):
+def check(root, desktop=True, wake_thread=False):
     try:status=json.loads((root/'status.json').read_text())
     except (OSError,ValueError):status={}
     now=time.time()
@@ -71,6 +79,9 @@ def check(root, desktop=True):
         print(json.dumps(alert),flush=True)
         health['last_alert']=alert
     elif 'last_alert' in previous:health['last_alert']=previous['last_alert']
+    if wake_thread:
+        from wake_crawl_thread import check as wake
+        health['thread_wake']=wake(root,health)
     temp=root/'health.tmp';temp.write_text(json.dumps(health,indent=2));temp.replace(root/'health.json')
     return health
 
@@ -79,7 +90,8 @@ def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--data',type=Path,default=Path('data/public-2026-10-16'))
     ap.add_argument('--no-desktop',action='store_true')
-    args=ap.parse_args();health=check(args.data,not args.no_desktop)
+    ap.add_argument('--wake-thread',action='store_true',help='Send stop events into the configured existing Codex thread')
+    args=ap.parse_args();health=check(args.data,not args.no_desktop,args.wake_thread)
     if health['severity'] in ('error','warning'):raise SystemExit(1)
 
 

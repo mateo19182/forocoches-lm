@@ -28,6 +28,7 @@ class Fetcher:
         self.pipeline=pipeline
         self.inflight={}
         self.context=None
+        self.root=None
 
     def fetch(self,url):
         if not hasattr(self.local,'client'):
@@ -46,10 +47,12 @@ class Fetcher:
             if response.status_code in (401,403,429) or response.headers.get('cf-mitigated')=='challenge':self.stopped.set()
             if self.parsers and response.status_code==200 and response.headers.get('cf-mitigated')!='challenge':
                 try:
-                    response._fc_parsed=self.parsers.submit(collect.parse,response.content,url).result()
+                    response._fc_parsed,response._fc_raw_gzip=self.parsers.submit(collect.prepare_page,response.content,url).result()
                 except Exception as error:
                     response._fc_parse_error=error
                     self.stopped.set()
+            # Store raw bodies in parallel; cold directory lookups made the serial writer the bottleneck.
+            if self.root:collect.store_raw(self.root,response)
             return response
         except requests.RequestException as error:
             error._fc_started_at=started
@@ -59,6 +62,7 @@ class Fetcher:
     def batch(self,db,root,remaining,first_pages=True,discover=False):
         if self.pipeline:
             self.context=(db,root,first_pages)
+            self.root=root
             limit=max(0,min(self.workers,remaining)-len(self.inflight))
             if limit and not self.stopped.is_set():
                 active={url for url,_ in self.inflight.values()}

@@ -25,7 +25,7 @@ from parallel_fetch import Fetcher
 
 LISTING = 'https://forocoches.com/foro/forumdisplay.php?f=2&page={}'
 LONG_CHARS = 2000
-MIN_REQUEST_INTERVAL = 1 / 35
+MIN_REQUEST_INTERVAL = 1 / 50
 STOP = False
 LAST_EXPORT_ATTEMPT = None
 RUN_STARTED_AT = time.time()
@@ -202,6 +202,12 @@ def progress(db,root,state,error=None):
     report['worker_container']=os.environ.get('FC_WORKER_CONTAINER')
     last_response=db.execute('SELECT fetched_at FROM fetch_events WHERE status IS NOT NULL ORDER BY id DESC LIMIT 1').fetchone()
     report['last_http_response_at']=last_response[0] if last_response else None
+    last_fetch=db.execute('SELECT status FROM fetch_events ORDER BY id DESC LIMIT 1').fetchone()
+    report['last_fetch_status']=last_fetch[0] if last_fetch else None
+    retry=db.execute("SELECT due,error,status FROM pages WHERE state='pending' ORDER BY due LIMIT 1").fetchone()
+    report['next_request_due_at']=retry[0] if retry else None
+    report['pending_retry_error']=retry[1] if retry else None
+    report['pending_retry_http_status']=retry[2] if retry else None
     report['run_started_at']=RUN_STARTED_AT
     report['network_ready']=Path('/sys/class/net/tun0').exists() if report['route']=='airvpn' else None
     report['network_namespace']=os.readlink('/proc/self/ns/net')
@@ -224,7 +230,8 @@ def progress(db,root,state,error=None):
     export_due=LAST_EXPORT_ATTEMPT is None or report['attempts']-LAST_EXPORT_ATTEMPT>=100 or state!='running'
     if export_due and (not report['limits'].get('complete_id_scan') or state!='running'):
         export_long_posts(db,root)
-        source_yield(db,root)
+        if not settings.get('complete_id_scan'):
+            source_yield(db,root)
         LAST_EXPORT_ATTEMPT=report['attempts']
     return report
 
@@ -276,7 +283,7 @@ def main():
     ap.add_argument('--max-attempts',type=int,default=5000)
     ap.add_argument('--hours',type=float,default=24)
     ap.add_argument('--max-body-mb',type=int,default=2000)
-    ap.add_argument('--workers',type=int,choices=range(1,17),help='Fetch concurrency; starts share one host limiter')
+    ap.add_argument('--workers',type=int,choices=range(1,25),help='Fetch concurrency; starts share one host limiter')
     ap.add_argument('--parser-workers',type=int,choices=range(0,5),help='CPU parser processes; requests and SQLite remain in one collector')
     ap.add_argument('--cookies',type=Path,help='Private Netscape session file; no automatic login')
     ap.add_argument('--posts-per-page',type=int,choices=[20,30,40,50,100],help='Fixed page size; verify server support before migrating a guest queue')
@@ -289,7 +296,7 @@ def main():
     ap.add_argument('--min-own-chars',type=int,help='Retain long own-text posts and sections by an OP with a long post')
     ap.add_argument('--all-thread-pages',action='store_true',help='Collect continuations without the length-based page cap')
     ap.add_argument('--min-free-gb',type=float,default=0,help='Stop before free disk space falls below this amount')
-    ap.add_argument('--delay',type=float,help='Shared request-start interval, at least 1/35 second (35 total requests/second)')
+    ap.add_argument('--delay',type=float,help='Shared request-start interval, at least 0.02 second (50 total requests/second)')
     ap.add_argument('--novel-pilot',action='store_true',help='Exclude archive IDs; cap non-long threads at 20 pages')
     ap.add_argument('--candidate-limit',type=int,default=1000)
     ap.add_argument('--first-pages-only',action='store_true')
@@ -299,7 +306,7 @@ def main():
     if min(args.max_attempts,args.hours,args.max_body_mb,args.listing_pages,args.candidate_limit)<=0:ap.error('Limits must be positive')
     if args.novel_pilot and not args.stories_only:ap.error('Novel pilot requires --stories-only')
     if args.first_pages_only and args.all_thread_pages:ap.error('Choose either first-page-only or all-page collection')
-    if args.delay is not None and args.delay<MIN_REQUEST_INTERVAL:ap.error('Shared request interval must be at least 1/35 second')
+    if args.delay is not None and args.delay<MIN_REQUEST_INTERVAL:ap.error('Shared request interval must be at least 0.02 second')
     if args.complete_id_scan and not args.first_pages_only:ap.error('Complete ID scanning requires --first-pages-only')
     if args.target_posts is not None and args.target_posts<1:ap.error('Target posts must be positive')
     if args.max_discovered_pages<1:ap.error('Queue size must be positive')

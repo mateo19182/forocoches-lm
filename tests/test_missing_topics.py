@@ -8,6 +8,36 @@ from unittest.mock import patch
 import collect
 
 class MissingTopicTests(unittest.TestCase):
+    def test_empty_closed_thread_requires_matching_search_and_print_controls(self):
+        url=collect.canonical('showthread.php?t=988322')
+        html=b'''<a href="login.php?do=logout">Logout</a>
+            <form action="search.php?do=process"><input name="searchthreadid" value="988322"></form>
+            <a href="printthread.php?t=988322">Print</a>
+            <div id="posts"><div id="lastpost"></div></div>'''
+        cases=[(html,200,{},Path('session.cookies'),'empty'),
+               (html.replace(b'name="searchthreadid" value="988322"',b'name="searchthreadid" value="1"'),200,{},Path('session.cookies'),'blocked'),
+               (html.replace(b'printthread.php?t=988322',b'printthread.php?t=1'),200,{},Path('session.cookies'),'blocked'),
+               (html.replace(b'printthread.php?t=',b'https://other.test/foro/printthread.php?t='),200,{},Path('session.cookies'),'blocked'),
+               (html.replace(b'search.php?',b'https://other.test/foro/search.php?'),200,{},Path('session.cookies'),'blocked'),
+               (html.replace(b'login.php?do=logout',b'login.php'),200,{},Path('session.cookies'),'blocked'),
+               (html.replace(b'<div id="lastpost"></div>',b'<div id="lastpost"></div><table>Unparsed post</table>'),200,{},Path('session.cookies'),'blocked'),
+               (html+b'<input id="qr_threadid" value="1">',200,{},Path('session.cookies'),'blocked'),
+               (html+b'<script src="/cf-chl-challenge.js"></script>',200,{},Path('session.cookies'),'blocked'),
+               (html+b'<div>captcha</div>',200,{},Path('session.cookies'),'blocked'),
+               (html,200,{},None,'blocked'),
+               (html,200,{'cf-mitigated':'challenge'},Path('session.cookies'),'blocked'),
+               (html,403,{},Path('session.cookies'),'blocked'),
+               (html,429,{},Path('session.cookies'),'blocked')]
+        for content,status,headers,cookies,expected in cases:
+            with self.subTest(content=content,status=status,expected=expected):
+                with tempfile.TemporaryDirectory() as directory,contextlib.redirect_stdout(io.StringIO()):
+                    root=Path(directory)
+                    with collect.connect(root) as db:
+                        collect.enqueue(db,[url])
+                        actual=collect.save_response(db,root,url,0,
+                            SimpleNamespace(status_code=status,headers=headers,content=content),cookies=cookies)
+                        self.assertEqual(actual,expected)
+
     def test_signed_in_thread_permission_notice_is_restricted(self):
         url=collect.canonical('showthread.php?t=121178')
         notice='''<main>Información No tienes permisos para acceder a esta página.

@@ -14,6 +14,52 @@ from parallel_fetch import Fetcher
 from test_collect import HTML
 
 class ParallelTests(unittest.TestCase):
+    def test_worker_preparation_keeps_notice_policy_and_exact_raw_bytes(self):
+        url=collect.canonical('showthread.php?t=1')
+        cookies=Path('session.cookies')
+        logout='<a href="login.php?do=logout">Logout</a>'
+        permission='No tienes permisos para acceder a esta página. Falta de validación de tu cuenta'
+        empty='<input id="qr_threadid" value="1"><div id="posts"><div id="lastpost"></div></div>'
+        cases=[(HTML,cookies,'done'),
+               ('Tema especificado inválido.',cookies,'missing'),
+               ('No has iniciado sesión o no tienes permiso para acceder a esta página.',cookies,'blocked'),
+               ('No has iniciado sesión o no tienes permiso para acceder a esta página.',None,'restricted'),
+               (permission+logout,cookies,'restricted'),(permission+logout,None,'blocked'),
+               (permission+logout+'captcha',cookies,'blocked'),
+               (empty+logout,cookies,'empty'),(empty+logout,None,'blocked'),
+               (empty+logout+'<script src="/cf-chl-challenge.js"></script>',cookies,'blocked'),
+               ('Unexpected page',cookies,'blocked')]
+        for html,cookie_file,expected in cases:
+            with self.subTest(expected=expected,html=html):
+                content=html.encode() if isinstance(html,str) else html
+                with patch('collect.page_soup',wraps=collect.page_soup) as soup:
+                    parsed,compressed=collect.prepare_page(content,url)
+                    self.assertEqual(soup.call_count,1)
+                response=SimpleNamespace(status_code=200,headers={},content=content,
+                                         _fc_parsed=parsed,_fc_raw_gzip=compressed)
+                with tempfile.TemporaryDirectory() as directory,contextlib.redirect_stdout(io.StringIO()):
+                    root=Path(directory);db=collect.connect(root)
+                    with db:collect.enqueue(db,[url])
+                    with patch('collect.page_soup',side_effect=AssertionError('Duplicate page DOM')), \
+                         patch('collect.compress_raw',side_effect=AssertionError('Duplicate compression')):
+                        self.assertEqual(collect.save_response(db,root,url,0,response,cookies=cookie_file),expected)
+                    raw=next(root.glob('raw/*/*.html.gz'))
+                    self.assertEqual(gzip.decompress(raw.read_bytes()),content)
+                    self.assertEqual(db.execute('SELECT body_bytes FROM fetch_events').fetchone()[0],len(content))
+                    db.close()
+
+    def test_prepared_missing_page_is_saved_without_building_another_dom(self):
+        url=collect.canonical('showthread.php?t=1')
+        content='<main>Información Tema especificado inválido.</main>'.encode()
+        response=SimpleNamespace(status_code=200,headers={},content=content,
+                                 _fc_parsed=collect.parse(content,url))
+        with tempfile.TemporaryDirectory() as directory,contextlib.redirect_stdout(io.StringIO()):
+            root=Path(directory);db=collect.connect(root)
+            with db:collect.enqueue(db,[url])
+            with patch('collect.page_soup',side_effect=AssertionError('Duplicate page DOM')):
+                self.assertEqual(collect.save_response(db,root,url,0,response),'missing')
+            db.close()
+
     def test_prepared_page_is_saved_without_parsing_again(self):
         url=collect.canonical('showthread.php?t=1')
         response=SimpleNamespace(status_code=200,headers={},content=HTML,_fc_parsed=collect.parse(HTML,url))
@@ -151,6 +197,29 @@ class ParallelTests(unittest.TestCase):
             self.assertEqual(first_saw_third,[True])
             self.assertEqual(len(starts),len(set(starts)))
             self.assertEqual(db.execute("SELECT count(*) FROM pages WHERE state='done'").fetchone()[0],3)
+            db.close()
+
+    @patch('parallel_fetch.transport.session')
+    def test_pipeline_workers_store_raw_bodies_off_the_writer_thread(self,session):
+        session.return_value.get.return_value=SimpleNamespace(status_code=200,content=HTML,headers={})
+        writer=threading.get_ident();stored_on=[]
+        store=collect.store_raw
+        def tracked(root,response):
+            stored_on.append(threading.get_ident());return store(root,response)
+        with tempfile.TemporaryDirectory() as directory,contextlib.redirect_stdout(io.StringIO()), \
+             patch('collect.store_raw',side_effect=tracked):
+            root=Path(directory);db=collect.connect(root)
+            with db:collect.enqueue(db,[collect.canonical(f'showthread.php?t={tid}') for tid in (1,2)])
+            fetcher=Fetcher(2,.01);fetcher.pipeline=True
+            try:
+                while db.execute('SELECT count(*) FROM fetch_events').fetchone()[0]<2:
+                    fetcher.batch(db,root,2-db.execute('SELECT count(*) FROM fetch_events').fetchone()[0])
+            finally:fetcher.close()
+            self.assertEqual(len(stored_on),2)
+            self.assertNotIn(writer,stored_on)
+            self.assertEqual(len(list(root.glob('raw/*/*.html.gz'))),1)
+            self.assertEqual(list(root.glob('raw/*/*.tmp')),[])
+            self.assertEqual(db.execute("SELECT count(*) FROM pages WHERE state='done'").fetchone()[0],2)
             db.close()
 
     @patch('parallel_fetch.transport.session')

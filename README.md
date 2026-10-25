@@ -53,7 +53,7 @@ TÍTULO: Lo que me ha pasado hoy en el Mercadona +tocho
 | `scripts/export_webllm.py`, `web/` | browser weights and the site |
 | `scripts/bench/` | attention / LR / slowdown benchmarks from the v1–v2 investigation |
 | `systemd/` | example user units (crawler, monitors, web); edit paths before use |
-| `tests/` | 98 unit tests on synthetic fixtures |
+| `tests/` | 103 unit tests on synthetic fixtures, plus optional dependency checks |
 | `docs/` | [NEXT-RUN.md](docs/NEXT-RUN.md), [DATA-WISHLIST.md](docs/DATA-WISHLIST.md), [RELEASING.md](docs/RELEASING.md) |
 
 ## Setup
@@ -76,6 +76,20 @@ python monitor_crawl.py --data data/public-example --no-desktop
 ```
 
 Resumes from SQLite; limits persist across restarts. Restricted pages are recorded, access blocks pause collection and need a human look before resuming. `authenticate.py` makes one login attempt from a local account file (never rotates accounts). Keep account files and cookie jars under the ignored `secrets/`.
+
+The active oldest-first scan uses a shared 0.04-second request-start interval (25 total requests/second). The user lowered it from 35/s after repeated 503 bursts and a Cloudflare challenge on 2026-10-22, and earlier from 50/s after a real HTTP 429/challenge stop; signed-in control requests through the same AirVPN connection verified that access had recovered before resuming. Twenty-four fetch workers and four CPU parser processes share one collector and one SQLite writer. AirVPN, retention rules, budgets and access-stop guards remain in force. Actual throughput depends on parsing, network latency and disk contention; trial measurements live under the active data root as `rate-pipeline-*rps*.json`, `save-optimization-*.json` and `resume35-*.json`. Stop-event prompts read the current saved request cap so later automated repairs preserve it. The earlier parser v9 sample at the 50/s cap measured 46.55 requests/second over 150 seconds; throughput and ETA vary with workload.
+
+Parser v8 preserves literal incomplete numeric HTML references such as `&#title` before parsing. This prevents malformed thread titles from hiding otherwise valid posts and signed-in navigation; original response bytes remain unchanged in the raw archive.
+
+Parser v9 builds one page DOM for both extraction and no-post classification. Its `page_kind` reports `thread`, `missing`, `login`, `permission`, `empty` or `unknown`; the collector applies the existing authenticated/public access policy separately. Parser processes also prepare gzip level-3 raw archives, leaving the SQLite writer to persist results without repeating HTML parsing or compression. Existing raw files remain untouched. A 128-page sample compressed 2.8 times faster than level 9, using about 13% more space; decompressed HTML and source hashes are unchanged.
+
+Signed-in empty threads require an empty `posts` container containing only an empty `lastpost` marker and a logout link. The quick-reply thread ID must match the requested thread; closed threads that omit quick reply require matching same-site search and print controls instead. Unrecognised responses, login failures, rate limits and challenges still pause collection.
+
+The story health timer uses `monitor_crawl.py --wake-thread` to send stop events into the existing Codex conversation, using the local app-server control socket. Install its optional dependency with `.venv/bin/pip install -r requirements-monitor.txt`; the thread ID and socket path live in the ignored data root's `thread-wake-config.json`. It creates no separate agent or task, waits while the conversation is active, and deduplicates each incident. Harmless local/parser problems may be repaired and verified automatically; genuine login failures, rate limits and challenges remain stopped. The local Codex daemon must be available; Telegram alerts remain independent. Lost wake-up acknowledgements are recorded as uncertain rather than repeatedly starting turns.
+
+Health reports include `next_request_due_at`, `pending_retry_error` and `pending_retry_http_status` for the earliest pending page, plus `last_fetch_status`. When the latest fetch also returned HTTP 5xx, a scheduled server retry does not count as lost connectivity while waiting, or for 60 seconds after it becomes due. A missing VPN tunnel still stops immediately; connection errors, overdue retries and access blocks retain their existing stop checks.
+
+Full-ID scans use the incremental scan counters instead of the discovery-source yield report. Terminal states still export long posts, but skip that discovery-only aggregation, whose large SQLite temporary files could otherwise turn a genuine access pause into a service restart loop. Discovery-mode reporting is unchanged.
 
 ### Prepare and train
 

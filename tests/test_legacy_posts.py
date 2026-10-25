@@ -5,6 +5,17 @@ from test_collect import URL
 
 
 class LegacyPostTests(unittest.TestCase):
+    def test_incomplete_numeric_entity_in_title_preserves_thread_posts(self):
+        html='''<title>Bad &#title</title><a href="login.php?do=logout">Logout</a>
+        <table id="post123"><tr><td><a href="member.php?u=4">Author</a>
+        <a id="postcount123">1</a><div id="post_message_123" />Hola &#literal<br>mundo</div></td></tr></table>'''
+        parsed=collect.parse(html,URL)
+        self.assertEqual([p['id'] for p in parsed['posts']],[123])
+        self.assertEqual(parsed['title'],'Bad &#title')
+        self.assertEqual(parsed['posts'][0]['text'],'Hola &#literal\nmundo')
+        self.assertEqual(parsed['posts'][0]['author_id'],4)
+        self.assertTrue(collect.page_soup(html).select_one('a[href*="login.php?do=logout"]'))
+
     def test_logged_in_table_layout_with_self_closing_message_div(self):
         html = '''<title>Legacy thread</title>
         <table id="post123" class="tborder">

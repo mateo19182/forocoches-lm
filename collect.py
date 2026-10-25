@@ -4,10 +4,12 @@ import fcntl
 import gzip
 import hashlib
 import json
+import os
 from pathlib import Path
 import random
 import re
 import sqlite3
+import threading
 import time
 from urllib.parse import parse_qs, urljoin, urlparse
 
@@ -17,7 +19,7 @@ import transport
 import post_retention
 
 BASE = 'https://forocoches.com/foro/'
-VERSION = 7
+VERSION = 9
 
 
 def canonical(url):
@@ -50,6 +52,8 @@ def page_soup(html):
     # Current forum pages declare UTF-8; guessing bytes can select MacRoman.
     if isinstance(html, bytes):
         html = html.decode('utf-8', errors='replace')
+    # An incomplete numeric reference can make html.parser swallow the rest of a title/page.
+    html = re.sub(r'&#(?![0-9]|[xX][0-9a-fA-F])', '&amp;#', html)
     # Legacy logged-in pages self-close message divs; browsers treat them as open tags.
     html = re.sub(r'''(<div\b[^>]*\bid=["']post_message_\d+["'][^>]*?)\s*/>''', r'\1>', html)
     return BeautifulSoup(html, 'html.parser')
@@ -90,7 +94,16 @@ def parse(html, url):
     return clean_unicode(dict(page_count_observed=page_count,
                 subforum=forums[-1].get_text(' ', strip=True) if forums else None,
                 title=soup.title.get_text(' ', strip=True) if soup.title else None,
-                posts=posts, links=links, parser_version=VERSION))
+                posts=posts, links=links, parser_version=VERSION,
+                page_kind='thread' if posts else empty_page_kind(soup,url)))
+
+
+def compress_raw(html):
+    return gzip.compress(html,compresslevel=3)
+
+
+def prepare_page(html,url):
+    return parse(html,url),compress_raw(html)
 
 
 def connect(root):
@@ -135,24 +148,81 @@ def enqueue(db, urls):
 
 def empty_thread(soup, url):
     posts=soup.find(id='posts')
-    thread=soup.find(id='qr_threadid')
     last=posts.find(id='lastpost',recursive=False) if posts else None
-    return bool(posts is not None and thread is not None and last is not None
-                and thread.get('value')==parse_qs(urlparse(url).query)['t'][0]
-                and not posts.get_text(strip=True)
-                and len(posts.find_all(recursive=False))==1 and not last.find()
-                and soup.select_one('a[href*="login.php?do=logout"]'))
+    if not (posts is not None and last is not None and not posts.get_text(strip=True)
+            and len(posts.find_all(recursive=False))==1 and not last.find()
+            and soup.select_one('a[href*="login.php?do=logout"]')):
+        return False
+    if any(marker in str(soup).lower() for marker in ('cf-chl-','captcha')):
+        return False
+    expected=parse_qs(urlparse(url).query)['t'][0]
+    thread=soup.find(id='qr_threadid')
+    if thread is not None:
+        return thread.get('value')==expected
+
+    def same_forum_path(href,path):
+        try:
+            target=urlparse(urljoin(url,href))
+            return target.scheme=='https' and target.hostname=='forocoches.com' and target.path==path
+        except ValueError:
+            return False
+
+    # Closed threads omit quick reply; require two other matching thread controls.
+    search=any(same_forum_path(form.get('action',''),'/foro/search.php')
+               and form.find('input',attrs={'name':'searchthreadid','value':expected}) is not None
+               for form in soup.find_all('form'))
+    printable=any(same_forum_path(a['href'],'/foro/printthread.php')
+                  and parse_qs(urlparse(a['href']).query).get('t')==[expected]
+                  for a in soup.select('a[href]'))
+    return search and printable
 
 
-def save_response(db, root, url, attempts, response, max_thread_pages=None, cookies=None, min_own_chars=None):
-    now = time.time()
+def empty_page_kind(soup,url):
+    notice=' '.join(soup.get_text(' ',strip=True).split())
+    if any(message in notice for message in ('Tema especificado inválido.', 'Ningún Tema especificado.')):
+        return 'missing'
+    if 'No has iniciado sesión o no tienes permiso para acceder a esta página.' in notice:
+        return 'login'
+    if (soup.select_one('a[href*="login.php?do=logout"]')
+            and 'No tienes permisos para acceder a esta página.' in notice
+            and 'Falta de validación de tu cuenta' in notice
+            and not any(marker in str(soup).lower() for marker in ('cf-chl-', 'captcha'))):
+        return 'permission'
+    if empty_thread(soup,url):
+        return 'empty'
+    return 'unknown'
+
+
+def empty_page_outcome(kind,authenticated):
+    if kind=='missing':
+        return 'missing','Forum invalid-topic notice returned with HTTP 200'
+    if kind=='login':
+        return ('blocked' if authenticated else 'restricted'),'Explicit login/permission notice returned with HTTP 200'
+    if authenticated and kind=='permission':
+        return 'restricted','Signed-in account lacks permission for this thread; skipped'
+    if authenticated and kind=='empty':
+        return 'empty','Authenticated thread rendered with an empty posts container'
+    return 'blocked','No posts: possible login, challenge, removed thread or parser change'
+
+
+def store_raw(root, response):
     digest = hashlib.sha256(response.content).hexdigest()
     path = root / 'raw' / digest[:2] / (digest + '.html.gz')
     path.parent.mkdir(parents=True, exist_ok=True)
     if not path.exists():
-        temp = path.with_suffix('.tmp')
-        temp.write_bytes(gzip.compress(response.content))
+        # Unique temp name: fetch workers may store identical bodies concurrently.
+        temp = path.with_suffix(f'.{os.getpid()}.{threading.get_ident()}.tmp')
+        compressed=getattr(response,'_fc_raw_gzip',None)
+        temp.write_bytes(compressed if isinstance(compressed,bytes) else compress_raw(response.content))
         temp.replace(path)
+    response._fc_raw_digest=digest
+    return digest
+
+
+def save_response(db, root, url, attempts, response, max_thread_pages=None, cookies=None, min_own_chars=None):
+    now = time.time()
+    digest = getattr(response,'_fc_raw_digest',None)
+    if not isinstance(digest,str):digest=store_raw(root,response)
     state, error, due = 'done', None, 0
     parsed = None
     try:
@@ -192,22 +262,7 @@ def save_response(db, root, url, attempts, response, max_thread_pages=None, cook
         prepared=getattr(response,'_fc_parsed',None)
         parsed = prepared if isinstance(prepared,dict) else parse(response.content, url)
         if not parsed['posts']:
-            soup=page_soup(response.content)
-            notice = ' '.join(soup.get_text(' ',strip=True).split())
-            if any(message in notice for message in ('Tema especificado inválido.', 'Ningún Tema especificado.')):
-                state, error = 'missing', 'Forum invalid-topic notice returned with HTTP 200'
-            elif 'No has iniciado sesión o no tienes permiso para acceder a esta página.' in notice:
-                state = 'blocked' if cookies else 'restricted'
-                error = 'Explicit login/permission notice returned with HTTP 200'
-            elif (cookies and soup.select_one('a[href*="login.php?do=logout"]')
-                  and 'No tienes permisos para acceder a esta página.' in notice
-                  and 'Falta de validación de tu cuenta' in notice
-                  and not any(marker in str(soup).lower() for marker in ('cf-chl-', 'captcha'))):
-                state,error='restricted','Signed-in account lacks permission for this thread; skipped'
-            elif cookies and empty_thread(soup,url):
-                state,error='empty','Authenticated thread rendered with an empty posts container'
-            else:
-                state, error = 'blocked', 'No posts: possible login, challenge, removed thread or parser change'
+            state,error=empty_page_outcome(parsed.get('page_kind','unknown'),bool(cookies))
     if attempts >= 7 and state == 'pending':
         state = 'failed'
     with db:

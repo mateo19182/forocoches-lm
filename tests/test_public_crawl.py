@@ -16,21 +16,48 @@ class PublicCrawlTests(unittest.TestCase):
     @patch('public_crawl.signal.signal')
     @patch('public_crawl.transport.host_lock')
     @patch('public_crawl.transport.session')
-    def test_complete_scan_pipeline_publishes_final_persisted_counts(self,session,host_lock,signal):
-        session.return_value.get.side_effect=lambda url,**kwargs:SimpleNamespace(status_code=200,content=HTML,headers={},url=url)
+    def test_full_scan_challenge_exits_cleanly_without_discovery_yield_report(self,session,host_lock,signal):
+        session.return_value.get.return_value=SimpleNamespace(
+            status_code=403,content=b'Challenge evidence',headers={'cf-mitigated':'challenge'})
         with tempfile.TemporaryDirectory() as directory,contextlib.redirect_stdout(io.StringIO()):
             root=Path(directory)
-            args=['public_crawl.py','--data',directory,'--stories-only','--workers','2','--parser-workers','2','--delay','0.028571428572',
+            args=['public_crawl.py','--data',directory,'--stories-only','--workers','2','--delay','0.03',
                   '--scan-start','1','--scan-end','3','--first-pages-only','--complete-id-scan','--max-attempts','3']
-            with patch('sys.argv',args),patch('public_crawl.SOURCES',[]),patch('public_crawl.STOP',False),patch('public_crawl.LAST_EXPORT_ATTEMPT',None):
+            with patch('sys.argv',args),patch('public_crawl.SOURCES',[]),patch('public_crawl.STOP',False), \
+                 patch('public_crawl.LAST_EXPORT_ATTEMPT',None), \
+                 patch('public_crawl.source_yield',side_effect=sqlite3.OperationalError('database or disk is full')) as yield_report:
+                public_crawl.main()
+            self.assertEqual(json.loads((root/'status.json').read_text())['state'],'paused')
+            self.assertTrue((root/'long-posts.jsonl').exists())
+            self.assertEqual(len(list(root.glob('raw/*/*.html.gz'))),1)
+            with sqlite3.connect(root/'crawl.sqlite') as db:
+                self.assertEqual(db.execute("SELECT count(*) FROM pages WHERE state='blocked'").fetchone()[0],1)
+            yield_report.assert_not_called()
+            self.assertEqual(session.return_value.get.call_count,1)
+
+    @patch('public_crawl.signal.signal')
+    @patch('public_crawl.transport.host_lock')
+    @patch('public_crawl.transport.session')
+    def test_complete_scan_pipeline_publishes_final_persisted_counts(self,session,host_lock,signal):
+        missing='<main>Información Tema especificado inválido.</main>'.encode()
+        session.return_value.get.side_effect=lambda url,**kwargs:SimpleNamespace(
+            status_code=200,content=missing if 't=2&' in url else HTML,headers={},url=url)
+        with tempfile.TemporaryDirectory() as directory,contextlib.redirect_stdout(io.StringIO()):
+            root=Path(directory)
+            args=['public_crawl.py','--data',directory,'--stories-only','--workers','24','--parser-workers','2','--delay','0.020000000001',
+                  '--scan-start','1','--scan-end','3','--first-pages-only','--complete-id-scan','--max-attempts','3']
+            with patch('sys.argv',args),patch('public_crawl.SOURCES',[]),patch('public_crawl.STOP',False),patch('public_crawl.LAST_EXPORT_ATTEMPT',None), \
+                 patch('collect.page_soup',side_effect=AssertionError('DOM work reached SQLite writer')), \
+                 patch('collect.compress_raw',side_effect=AssertionError('Compression reached SQLite writer')):
                 public_crawl.main()
             status=json.loads((root/'status.json').read_text())
             with sqlite3.connect(root/'crawl.sqlite') as db:
                 self.assertEqual(status['state'],'scan_complete')
                 self.assertEqual(status['attempts'],3)
                 self.assertEqual(db.execute('SELECT count(*) FROM fetch_events').fetchone()[0],3)
-                self.assertEqual(status['pages'],{'done':3})
+                self.assertEqual(status['pages'],{'done':2,'missing':1})
                 self.assertEqual(status['limits']['parser_workers'],2)
+                self.assertEqual(status['limits']['workers'],24)
                 self.assertTrue(status['id_scan']['complete'])
             self.assertEqual(session.return_value.get.call_count,3)
 
