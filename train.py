@@ -4,8 +4,8 @@
     # smoke test: add --max-steps 30
 
 Data is TRL prompt/completion JSONL from fcdata/mix.py: the header (prompt) is masked from the
-loss, the thread (completion) is trained, and TRL appends EOS. Documents are packed into 4096-token
-rows with best-fit decreasing; Unsloth's packed attention keeps them from attending to each other
+loss, the thread (completion) is trained, and TRL appends EOS. Documents are packed into --max-len token
+rows (default 4096) with best-fit decreasing; Unsloth's packed attention keeps them from attending to each other
 (verified by scripts/check_packing.py).
 """
 
@@ -28,7 +28,6 @@ from unsloth import FastLanguageModel
 
 MODEL = "unsloth/gemma-3-1b-pt"  # ungated mirror of google/gemma-3-1b-pt
 MAX_LEN = 4096
-MIN_ROW_TOKENS = 2048
 EVAL_DOCS = 1000
 
 
@@ -48,6 +47,8 @@ def main():
     ap.add_argument("--min-lr-rate", type=float, default=0.0,
                     help="cosine floor as a fraction of --lr; >0 leaves room for a second stage to finish the decay")
     ap.add_argument("--eval-steps", type=int, default=200)
+    ap.add_argument("--save-steps", type=int, help="checkpoint interval (default: --eval-steps)")
+    ap.add_argument("--max-len", type=int, default=MAX_LEN, help="packed row length in tokens")
     ap.add_argument("--resume", help="checkpoint dir to resume from (e.g. runs/v1/checkpoint-500); same --data/--out")
     ap.add_argument("--workers", type=int, default=2, help="dataloader workers (0 saves host RAM)")
     ap.add_argument("--gc", choices=["unsloth", "hf", "none"], default="hf",
@@ -58,7 +59,7 @@ def main():
 
     model, tok = FastLanguageModel.from_pretrained(
         args.init,
-        max_seq_length=MAX_LEN,
+        max_seq_length=args.max_len,
         dtype=torch.bfloat16,
         load_in_4bit=False,
         full_finetuning=True,
@@ -79,7 +80,7 @@ def main():
 
     cfg = SFTConfig(
         output_dir=args.out,
-        max_length=MAX_LEN,
+        max_length=args.max_len,
         packing=True,
         packing_strategy="bfd",
         completion_only_loss=True,
@@ -102,7 +103,7 @@ def main():
         eval_strategy="steps",
         eval_steps=args.eval_steps,
         save_strategy="steps",
-        save_steps=args.eval_steps,
+        save_steps=args.save_steps or args.eval_steps,
         save_total_limit=3,
         report_to="none",
         dataloader_num_workers=args.workers,
@@ -114,12 +115,13 @@ def main():
     # 128-token block) sends FlexAttention down a path with a generator graph break; the dynamic-shape graph dynamo
     # then builds serves every later batch and runs attention unfused: 12 -> 28 s/step for good (v1, v2 diagnosis
     # 2026-10-19, runs/diag). Rows are otherwise 4065-4096 tokens, so this loses well under 0.1% of tokens.
+    min_row_tokens = args.max_len // 2
     for split in ("train_dataset", "eval_dataset"):
         d = getattr(trainer, split)
         n = len(d)
-        d = d.filter(lambda ex: len(ex["input_ids"]) >= MIN_ROW_TOKENS, num_proc=8, desc=f"drop short rows ({split})")
+        d = d.filter(lambda ex: len(ex["input_ids"]) >= min_row_tokens, num_proc=8, desc=f"drop short rows ({split})")
         setattr(trainer, split, d)
-        print(f"{split}: {n} packed rows, {n - len(d)} shorter than {MIN_ROW_TOKENS} tokens dropped")
+        print(f"{split}: {n} packed rows, {n - len(d)} shorter than {min_row_tokens} tokens dropped")
     if os.environ.get("FC_DYNAMO_STATS"):
         # Diagnostic: how many graphs dynamo has compiled so far and what the live recompile budgets are.
         from transformers import TrainerCallback
