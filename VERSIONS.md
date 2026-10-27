@@ -8,6 +8,7 @@ Dataset completion verified 2026-10-18; publication cleanup checked local final-
 | v1 | Same historical source and filtering as v0; larger weighted sample and replay pool | 269.8M estimated tokens | Final model config exists locally; evaluated against base/v0 |
 | curated v2 dataset | Historical archive merged with a frozen public crawl snapshot; media/alta only; stories, questions, debate, humour and hypotheticals | 55,392,861 measured training completion tokens | Superseded by curated v2.1; no training launched by this build |
 | curated v2.1 dataset | Completed crawl snapshot; new/changed openers relabelled, plus a bounded audit of existing stories | 56,533,981 measured training completion tokens | Dataset complete and validated; no training launched |
+| curated v3 dataset | v2.1 plus the full-ID long-post crawl (2003–2026), Haiku labels, nick masking, `año` header | 545,517,660 measured completion tokens in `data/mix/v3` (8192 context, stories ×2) | Model run v3 training on Vast.ai (RTX 5090) from v2 |
 
 V0/v1 counts use the old character-based estimate; v2 uses the local Gemma tokenizer. These are not identical token accounting methods. V2 selects distinct chunks at 60% stories, 30% conversation and 10% general Spanish. It is smaller because the distinct story pool limits this ratio. V0/v1 use weighted repetitions and include low-quality labels, news and other threads (sales excluded).
 
@@ -78,3 +79,14 @@ Curated v2.1 retains 171,248 threads (169,556 train; 1,692 validation), includin
 The selected mix has 45,929 training chunks and 56,533,981 completion tokens: 33,919,304 story, 16,960,803 conversation, 5,653,874 replay. Validation has 2,228 chunks and 2,356,095 completion tokens. Full validation passed: maximum sequence 4,090 tokens, zero overlapping groups/replay IDs/normalized long completions, matching manifests and token counts. Build status is `complete`.
 
 Retained source provenance references 5,959 globally new post IDs across 1,819 threads; this is not a novel-token count. Of those threads, 1,069 are represented in selected training chunks and 10 in validation, which does not imply every new post in each thread is present in selected chunks. The increase over v2 is 1,141,120 training tokens, including selection/filter changes. No model training was started by this build.
+
+
+## V3 dataset and releases (2026-10-27)
+
+Source: the oldest-first full-ID crawl `data/stories-long-2026-10-19` (IDs 1–10,841,474, first pages, long posts ≥2,000 own chars plus opener context/follow-ups). `fcdata/crawl_v3.py docs` builds pseudonymised posts and thread documents; threads already in the archive or v2.1 keep their earlier version. A parser fix (`parse_post` now uses the crawled `post_message` div; its first `<td>` was a quote box) recovers the own text of 710k posts. `@mentions` and plain-text quote headers naming users outside the thread become `usuario`, now also in v2.1-origin rows (v2.1 had masked mentions only in its HF export and left ~4.8k `Cita de <nick>` headers).
+
+Labels: Haiku 5.5 batches, title + 1,500 opener chars + three short replies, 325,058 threads, $14.57 including $1.82 for a cancelled batch built from mis-parsed text. `fcdata/crawl_v3.py merge` → `data/curated/v3`: 322,896 threads (81,834 historia), year from the crawl or estimated from the nearest crawled thread ID (98.8% leave-one-out). Archive IDs 7.0–8.0M are 2019–2020.
+
+Mix: `fcdata.mix_v2 --fields tipo año --max-tokens 8192 --story-repeats 2 --budget stories=all --budget conversation=all --budget archive_conversation=90e6 --budget replay=all` with `data/replay/fineweb2_spa_240m.jsonl`: stories 279.9M, crawl conversation 119.8M, archive conversation 90.0M, replay 55.8M.
+
+HF: published `mateo-19182/forocoches-threads-v3` (curated pool) and `mateo-19182/forocoches-crawl-2026` (all 345,039 crawled threads / 1,424,210 posts as Parquet, labels where available). `forocoches-threads-v2.1` was deleted at the user's request; v3 contains all of its threads. Models v1/v2 stay up for the web.

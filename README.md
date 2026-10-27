@@ -12,7 +12,8 @@ A small language model that writes [ForoCoches](https://forocoches.com) threads:
 |---|---|
 | Model (bf16, Transformers) | [mateo-19182/forocoches-lm-v2](https://huggingface.co/mateo-19182/forocoches-lm-v2) |
 | Browser weights (q4f16_1 MLC, for WebLLM) | [forocoches-lm-v2-q4f16_1-MLC](https://huggingface.co/mateo-19182/forocoches-lm-v2-q4f16_1-MLC) · [v1](https://huggingface.co/mateo-19182/forocoches-lm-v1-q4f16_1-MLC) |
-| Dataset (171k labelled threads) | [forocoches-threads-v2.1](https://huggingface.co/datasets/mateo-19182/forocoches-threads-v2.1) |
+| Dataset (323k labelled threads, 2003–2026) | [forocoches-threads-v3](https://huggingface.co/datasets/mateo-19182/forocoches-threads-v3) |
+| Raw long-post crawl (345k threads, 1.4M posts) | [forocoches-crawl-2026](https://huggingface.co/datasets/mateo-19182/forocoches-crawl-2026) |
 
 Completion perplexity on 4,873 held-out threads (lower is better):
 

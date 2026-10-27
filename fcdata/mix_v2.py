@@ -9,7 +9,7 @@ import re
 
 from tokenizers import Tokenizer
 
-from .mix import header
+from .mix import ALL_FIELDS, header
 
 
 def chunks(text, prompt, tokenizer, max_tokens=4096):
@@ -58,6 +58,16 @@ def select(rows, target, rng):
     return chosen
 
 
+BUDGET_POOLS = ('stories', 'conversation', 'archive_conversation', 'replay')
+
+
+def parse_budget(text):
+    pool, _, value = text.partition('=')
+    if pool not in BUDGET_POOLS or not value:
+        raise argparse.ArgumentTypeError(f'expected POOL=TOKENS|all with POOL in {BUDGET_POOLS}')
+    return pool, None if value == 'all' else float(value)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--threads',type=Path,required=True)
@@ -67,6 +77,12 @@ def main():
     ap.add_argument('--out',type=Path,required=True)
     ap.add_argument('--shares',type=float,nargs=3,default=(.6,.3,.1))
     ap.add_argument('--seed',type=int,default=0)
+    ap.add_argument('--fields',nargs='+',default=list(ALL_FIELDS),choices=ALL_FIELDS,help='header fields (each subject to dropout)')
+    ap.add_argument('--max-tokens',type=int,default=4096,help='sequence length the trainer packs to')
+    ap.add_argument('--target-tokens',type=float,help='cap on training completion tokens (default: as many as the scarcest pool allows)')
+    ap.add_argument('--budget',type=parse_budget,action='append',help='per-pool token budget, replaces --shares: POOL=TOKENS|all; '
+                    'archive_conversation splits non-crawl conversation out of conversation')
+    ap.add_argument('--story-repeats',type=int,default=1,help='training copies of each story chunk, each with its own header draw')
     args = ap.parse_args()
     if any(x <= 0 for x in args.shares) or abs(sum(args.shares)-1) > 1e-8:
         ap.error('Shares must be positive and sum to one')
@@ -75,18 +91,23 @@ def main():
     tok.no_truncation()
     tok.no_padding()
     rng = random.Random(args.seed)
-    pools = {k:[] for k in ('stories','conversation','replay')}
+    budgets = dict(args.budget or [])
+    pools = {k:[] for k in BUDGET_POOLS}
     validation = []
     for n, line in enumerate(args.threads.open(), 1):
         row = json.loads(line)
         lab = row['label']
         group = 'stories' if lab['tipo']=='historia' else 'conversation'
-        prompt = header(row,lab,rng,dropout=row['split']=='train')
-        for index, (doc, tokens) in enumerate(chunks(row['text'],prompt,tok)):
-            doc['src'] = lab['tipo']
-            meta = dict(thread_id=row['thread_id'],group_id=row['group_id'],chunk=index,
-                        sources=row['sources'],quality=lab['calidad'],pool=group)
-            (pools[group] if row['split']=='train' else validation).append((doc,tokens,meta))
+        if group == 'conversation' and budgets and 'crawl-2026' not in row['sources']:
+            group = 'archive_conversation'
+        copies = args.story_repeats if group == 'stories' and row['split'] == 'train' else 1
+        for copy in range(copies):
+            prompt = header(row,lab,rng,dropout=row['split']=='train',fields=args.fields)
+            for index, (doc, tokens) in enumerate(chunks(row['text'],prompt,tok,args.max_tokens)):
+                doc['src'] = lab['tipo']
+                meta = dict(thread_id=row['thread_id'],group_id=row['group_id'],chunk=index,copy=copy,
+                            sources=row['sources'],quality=lab['calidad'],pool=group)
+                (pools[group] if row['split']=='train' else validation).append((doc,tokens,meta))
         if n % 10000 == 0:
             print(json.dumps(dict(stage='tokenize',threads=n)),flush=True)
     old_replay = set()
@@ -94,7 +115,7 @@ def main():
         row = json.loads(line)
         if row['src']=='replay':
             old_replay.add(hashlib.sha256(row['completion'].encode()).hexdigest())
-            for index,(doc,tokens) in enumerate(chunks(row['completion'],'',tok)):
+            for index,(doc,tokens) in enumerate(chunks(row['completion'],'',tok,args.max_tokens)):
                 doc['src']='replay'
                 validation.append((doc,tokens,dict(pool='replay',replay_id=hashlib.sha256(row['completion'].encode()).hexdigest(),chunk=index)))
     seen_replay = set()
@@ -104,21 +125,33 @@ def main():
         if digest in old_replay or digest in seen_replay:
             continue
         seen_replay.add(digest)
-        for index,(doc,tokens) in enumerate(chunks(text,'',tok)):
+        for index,(doc,tokens) in enumerate(chunks(text,'',tok,args.max_tokens)):
             doc['src']='replay'
             pools['replay'].append((doc,tokens,dict(pool='replay',replay_id=digest,chunk=index)))
     available = {k:sum(x[1] for x in rows) for k,rows in pools.items()}
-    if not all(available.values()):
-        raise ValueError(f'Cannot build requested mix: empty pool in {available}')
-    # A single pass through available stories sets the size; never pad with repeats.
-    total = min(available[k]/share for k,share in zip(pools,args.shares))
     training = []
-    for k,share in zip(pools,args.shares):
-        training.extend(select(pools[k],total*share,rng))
+    if budgets:
+        targets = {k: available[k] if v is None else v for k,v in budgets.items()}
+        short = {k:(t,available[k]) for k,t in targets.items() if t > available[k]}
+        if short:
+            raise ValueError(f'Budget exceeds available tokens (no padding): {short}')
+        for k,t in targets.items():
+            training.extend(select(pools[k],t,rng))
+    else:
+        share_pools = ('stories','conversation','replay')
+        if not all(available[k] for k in share_pools):
+            raise ValueError(f'Cannot build requested mix: empty pool in {available}')
+        # A single pass through available stories sets the size; never pad with repeats.
+        total = min(available[k]/share for k,share in zip(share_pools,args.shares))
+        if args.target_tokens:
+            total = min(total,args.target_tokens)
+        for k,share in zip(share_pools,args.shares):
+            training.extend(select(pools[k],total*share,rng))
     rng.shuffle(training)
-    summary = dict(available_completion_tokens=available,target_shares=dict(zip(pools,args.shares)),
-                   tokenizer=str(args.tokenizer),max_sequence_tokens=4096,seed=args.seed,
-                   note='One copy per chunk; 256-token masked continuation context; old replay holdout retained')
+    summary = dict(available_completion_tokens=available,budgets=budgets or None,story_repeats=args.story_repeats,
+                   target_shares=None if budgets else dict(zip(('stories','conversation','replay'),args.shares)),
+                   tokenizer=str(args.tokenizer),max_sequence_tokens=args.max_tokens,fields=args.fields,seed=args.seed,
+                   note='256-token masked continuation context; old replay holdout retained; stories repeat only with --story-repeats')
     for split,rows in (('train',training),('val',validation)):
         counts, tokens = Counter(), Counter()
         with (args.out/f'{split}.jsonl').open('w') as output, (args.out/f'{split}.manifest.jsonl').open('w') as manifest:

@@ -13,6 +13,7 @@ def validate(root, tokenizer):
     tok = Tokenizer.from_file(str(tokenizer))
     tok.no_padding()
     tok.no_truncation()
+    limit = json.loads((root/'summary.json').read_text()).get('max_sequence_tokens', 4096)
     sets, report = {}, {}
     for split in ('train','val'):
         groups, replay, contents = set(), set(), set()
@@ -28,7 +29,7 @@ def validate(root, tokenizer):
                 if hashlib.sha256(text.encode()).hexdigest() != m['sha256']:
                     raise ValueError('Manifest content mismatch')
                 tokens = len(tok.encode(text,add_special_tokens=False).ids)+2
-                if tokens > 4096:
+                if tokens > limit:
                     raise ValueError('Sequence exceeds token limit')
                 if len(tok.encode(row['completion'],add_special_tokens=False).ids) != m['completion_tokens']:
                     raise ValueError('Completion token count mismatch')

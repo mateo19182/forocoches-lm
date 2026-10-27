@@ -23,4 +23,15 @@ class ChunkTests(unittest.TestCase):
         self.assertGreater(len(result[1][0]['prompt']),len('tipo: historia\n\n'))
 
 
+@unittest.skipIf(Tokenizer is None, 'Run with .venv-train/bin/python for tokenizers')
+class BudgetTests(unittest.TestCase):
+    def test_parse_budget(self):
+        import argparse
+        from fcdata.mix_v2 import parse_budget
+        self.assertEqual(parse_budget('stories=all'), ('stories', None))
+        self.assertEqual(parse_budget('replay=6e7'), ('replay', 6e7))
+        with self.assertRaises(argparse.ArgumentTypeError):
+            parse_budget('poems=10')
+
+
 if __name__ == '__main__':unittest.main()

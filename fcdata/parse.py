@@ -195,7 +195,9 @@ def _scrub(s: str) -> str:
 
 def parse_post(html: str) -> Post:
     soup = BeautifulSoup(html, "lxml")
-    root = soup.find("td") or soup
+    # Crawled posts are the post_message div itself; its first <td> would be a quote box.
+    root = soup.find("div", id=re.compile(r"^post_message_")) if html.lstrip().startswith("<div") else None
+    root = root or soup.find("td") or soup
     r = _Renderer()
     text = r.render(root)
     r.post.text = _scrub(_tidy(text))

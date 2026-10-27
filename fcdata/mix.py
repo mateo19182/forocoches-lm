@@ -51,7 +51,7 @@ def weight(lab) -> float:
     return WEIGHTS[lab["tipo"]]
 
 
-ALL_FIELDS = ("tipo", "calidad", "etiquetas", "páginas")
+ALL_FIELDS = ("tipo", "calidad", "año", "etiquetas", "páginas")
 
 
 def header(row, lab, rng, dropout=True, calidad=True, fields=ALL_FIELDS) -> str:
@@ -60,6 +60,8 @@ def header(row, lab, rng, dropout=True, calidad=True, fields=ALL_FIELDS) -> str:
         cand.append(("tipo", lab["tipo"]))
         if calidad:
             cand.append(("calidad", lab["calidad"]))
+    if row.get("year"):
+        cand.append(("año", row["year"]))
     if row["tags"]:
         cand.append(("etiquetas", " ".join(row["tags"])))
     cand.append(("páginas", row["pages_bucket"]))

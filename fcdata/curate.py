@@ -99,7 +99,7 @@ def merge_thread(archive, tid, fresh, stats, root):
     return row, unchanged
 
 
-def deduplicate(rows, workers=2):
+def deduplicate(rows, workers=2, texts=None):
     parent = {tid: tid for tid in rows}
 
     def find(tid):
@@ -112,7 +112,7 @@ def deduplicate(rows, workers=2):
         a, b = find(a), find(b)
         parent[max(a, b)] = min(a, b)
 
-    texts = {tid: own_op(r) for tid, r in rows.items()}
+    texts = texts or {tid: own_op(r) for tid, r in rows.items()}
     exact = {}
     for tid in sorted(rows):
         # Generic short openers can have unrelated reply conversations.
