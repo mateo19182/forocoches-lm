@@ -27,9 +27,10 @@
 <!-- ============================================================ inicio -->
 <main id="page-intro" class="page grid" hidden>
   <section class="card hero">
-    <h1>Un modelo que escribe hilos de Forocoches</h1>
-    <p class="lead">Gemma 3 1B con full fine-tune sobre hilos de 2003 a 2026: el archivo histórico y un crawl propio de todos los hilos con posts largos. Títulos, OPs y respuestas, con el tipo de hilo y el año que le pidas.
-      La generación corre en tu navegador.</p>
+    <div>
+      <h1>Un modelo que escribe hilos de Forocoches</h1>
+      <p class="lead">Gemma 3 1B con full fine-tune sobre hilos de 2003 a 2026. Corre en tu navegador.</p>
+    </div>
     <p class="ctas"><a class="pill solid" href="#generar">Generar un hilo</a></p>
   </section>
 
@@ -37,9 +38,9 @@
     <article class="card">
       <h2>Datos</h2>
       <p id="i-total" class="num"></p>
-      <p>Archivo público 2019–2020 (<a class="lnk" href="https://github.com/Atenrev/forocoches-language-generation">Atenrev/forocoches-language-generation</a>) y, desde v3, un crawl propio de octubre de 2026 que recorrió todos los ids del foro (2003–2026).
+      <p>Archivo público 2019–2020 (<a class="lnk" href="https://github.com/Atenrev/forocoches-language-generation">Atenrev</a>) y, desde v3, un crawl propio de octubre de 2026 que recorrió todos los ids del foro (2003–2026).
         De cada hilo, solo la primera página. Del crawl, solo los hilos con algún post de 2.000 caracteres o más, y de ellos ese post y los del OP. Cada hilo lleva un tipo y un año que el modelo aprende a seguir.</p>
-      <p class="dim small">Para entrenar v3: tipo y calidad etiquetados con Claude Haiku; solo historias, preguntas, debates, humor e hipotéticos de calidad media o alta, sin duplicados. 249.232 hilos.</p>
+      <p class="dim small">Para entrenar v3: etiquetas de Claude Haiku; solo historias, preguntas, debates, humor e hipotéticos de calidad media o alta, sin duplicados (249.232 hilos).</p>
       <details class="fold">
         <summary>Categorías</summary>
         <table class="bars" id="i-tipos"></table>
@@ -51,7 +52,7 @@
         <li>HTML → texto plano: <code>TÍTULO</code>, <code>#n autor: texto</code>, citas <code>[cita=OP]…[/cita]</code>.</li>
         <li>Tipo y calidad de cada hilo con <a class="lnk" href="https://www.anthropic.com/claude/haiku">Claude Haiku</a>, leyendo el OP.</li>
         <li>Mix: historias ×2, resto ×1, compraventa fuera, ~10% replay de español general (<a class="lnk" href="https://huggingface.co/datasets/HuggingFaceFW/fineweb-2">FineWeb-2</a>, spa_Latn).</li>
-        <li>Full fine-tune de <a class="lnk" href="https://huggingface.co/google/gemma-3-1b-pt">Gemma 3 1B pt</a>, completion-only loss: la cabecera (tipo, año) condiciona y no se predice. v1 270 M tokens / 14 h y v2 496 M / 26 h en una RTX 3090 con filas de 4.096 tokens; v3 sigue desde v2 con 545 M más / 8 h en una RTX 5090 alquilada, con filas de 8.192.</li>
+        <li>Full fine-tune de <a class="lnk" href="https://huggingface.co/google/gemma-3-1b-pt">Gemma 3 1B pt</a>, completion-only loss: la cabecera (tipo, año) condiciona y no se predice. v1 y v2 en una RTX 3090; v3 sigue desde v2 en una RTX 5090 alquilada (8 h).</li>
         <li>Eval: perplexity en hilos no vistos, y leer samples.</li>
       </ol>
     </article>
@@ -77,21 +78,20 @@
       </div>
     </article>
     <article class="card wide links">
-      <h2>Enlaces</h2>
       <p><b>Usado</b>
-        <a class="pill small" href="https://huggingface.co/google/gemma-3-1b-pt">Gemma 3 1B pt · modelo base</a>
-        <a class="pill small" href="https://github.com/Atenrev/forocoches-language-generation">Archivo FC 2019–2020 · dataset</a>
+        <a class="pill small" href="https://huggingface.co/google/gemma-3-1b-pt">Gemma 3 1B · base</a>
+        <a class="pill small" href="https://github.com/Atenrev/forocoches-language-generation">Archivo 2019–2020 · dataset</a>
         <a class="pill small" href="https://huggingface.co/datasets/HuggingFaceFW/fineweb-2">FineWeb-2 · replay</a>
         <a class="pill small" href="https://github.com/mlc-ai/web-llm">WebLLM · inferencia</a>
         <a class="pill small" href="https://huggingface.co/scratchyone/anon-1b">anon-1b · inspiración</a></p>
       <p><b>Creado</b>
-        <a class="pill small solid" href="https://huggingface.co/mateo-19182/forocoches-lm-v3">forocoches-lm v3 · modelo</a>
-        <a class="pill small solid" href="https://huggingface.co/mateo-19182/forocoches-lm-v3-q4f16_1-MLC">v3 · pesos para navegador</a>
-        <a class="pill small solid" href="https://huggingface.co/datasets/mateo-19182/forocoches-threads-v3">forocoches-threads v3 · dataset</a>
+        <a class="pill small solid" href="https://huggingface.co/mateo-19182/forocoches-lm-v3">v3 · modelo</a>
+        <a class="pill small solid" href="https://huggingface.co/mateo-19182/forocoches-lm-v3-q4f16_1-MLC">v3 · pesos web</a>
+        <a class="pill small solid" href="https://huggingface.co/datasets/mateo-19182/forocoches-threads-v3">threads v3 · dataset</a>
         <a class="pill small solid" href="https://huggingface.co/datasets/mateo-19182/forocoches-crawl-2026">crawl 2026 · dataset</a>
         <a class="pill small" href="https://huggingface.co/mateo-19182/forocoches-lm-v2">v2 · modelo</a>
-        <a class="pill small" href="https://huggingface.co/mateo-19182/forocoches-lm-v2-q4f16_1-MLC">v2 · pesos para navegador</a>
-        <a class="pill small" href="https://huggingface.co/mateo-19182/forocoches-lm-v1-q4f16_1-MLC">v1 · pesos para navegador</a></p>
+        <a class="pill small" href="https://huggingface.co/mateo-19182/forocoches-lm-v2-q4f16_1-MLC">v2 · pesos web</a>
+        <a class="pill small" href="https://huggingface.co/mateo-19182/forocoches-lm-v1-q4f16_1-MLC">v1 · pesos web</a></p>
     </article>
   </section>
 
@@ -123,7 +123,7 @@
         <div class="field"><span class="dim">calidad</span><select id="calidad"></select></div>
         <div class="field"><span class="dim">año</span><select id="anio"></select></div>
         <div class="field"><span class="dim">páginas</span><select id="paginas"></select></div>
-        <div class="field"><span class="dim">etiquetas</span><input id="etiquetas" placeholder="+hd +tocho"></div>
+        <div class="field full"><span class="dim">etiquetas</span><input id="etiquetas" placeholder="+hd +tocho"></div>
       </div>
 
       <div class="actions">
@@ -151,7 +151,7 @@
 
       <form id="compose" class="compose">
         <div id="quote" class="quote" hidden></div>
-        <textarea id="user-text" rows="3" placeholder="tu post…"></textarea>
+        <textarea id="user-text" rows="2" placeholder="tu post…"></textarea>
         <div class="segs" id="as-who"><button type="button" data-v="OP" class="on">como OP</button><button type="button" data-v="forero">como forero</button></div>
         <div class="compose-row"><button type="submit" class="pill small">Publicar</button><span class="dim small">⌃⏎</span></div>
       </form>
@@ -183,15 +183,21 @@
   <section id="stats" class="card stats">
     <p id="s-total" class="lede"></p>
     <p class="dim small">Solo la primera página de cada hilo. El crawl 2026 recorrió los 10,8 M ids y guardó los hilos con algún post de 2.000+ caracteres: ese post, el OP y los demás posts del OP.</p>
-    <h2>hilos por tipo <span class="dim">y calidad de la etiqueta</span></h2>
-    <table class="bars" id="s-tipos"></table>
-    <p class="dim small legend"><i class="sw a"></i> alta <i class="sw m"></i> media <i class="sw b"></i> baja</p>
-    <h2>tokens de entrenamiento <span class="segs" id="s-mix-tabs"></span></h2>
-    <table class="bars" id="s-mix"></table>
-    <p id="s-mix-note" class="dim small"></p>
-    <h2>hilos por año <span class="dim">del OP, en el crawl 2026 de hilos con posts largos</span></h2>
-    <svg id="s-years" class="hist" viewBox="0 0 600 140" preserveAspectRatio="none"></svg>
-    <p id="s-years-note" class="dim small"></p>
+    <div class="stats-grid">
+      <div>
+      <h2>hilos por tipo <span class="dim">y calidad de la etiqueta</span></h2>
+      <table class="bars" id="s-tipos"></table>
+      <p class="dim small legend"><i class="sw a"></i> alta <i class="sw m"></i> media <i class="sw b"></i> baja</p>
+      </div>
+      <div>
+      <h2>tokens de entrenamiento <span class="segs" id="s-mix-tabs"></span></h2>
+      <table class="bars" id="s-mix"></table>
+      <p id="s-mix-note" class="dim small"></p>
+      <h2>hilos por año <span class="dim">del OP, en el crawl 2026 de hilos con posts largos</span></h2>
+      <svg id="s-years" class="hist" viewBox="0 0 600 140" preserveAspectRatio="none"></svg>
+      <p id="s-years-note" class="dim small"></p>
+      </div>
+    </div>
   </section>
 
   <article id="b-view" class="doc" hidden>

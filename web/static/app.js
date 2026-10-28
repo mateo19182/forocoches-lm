@@ -91,7 +91,7 @@ const row = (k, cells, n, d = "") => `<tr><td class="k">${k}</td><td><div class=
 
 async function intro() {
   const [s, rows, gen, curves] = await Promise.all(["/static/data/stats.json", "/api/threads?limit=5", "/api/generated?limit=5", "/static/data/curves.json"].map((u) => fetch(u).then((r) => r.json())));
-  $("#i-total").innerHTML = `<b>${fmt(s.total.n)} hilos</b> ${fmt(s.total.posts)} posts, ${(s.total.chars / 1e6).toLocaleString("es-ES", { maximumFractionDigits: 0 })} millones de caracteres`;
+  $("#i-total").innerHTML = `<b>${fmt(s.total.n)} hilos</b>${fmt(s.total.posts)} posts, ${(s.total.chars / 1e6).toLocaleString("es-ES", { maximumFractionDigits: 0 })} millones de caracteres`;
   const trend = (list, href, extra) => list.map((r, i) => `<li><a href="${href(r)}"><b>${i + 1}</b><span class="tt">${esc(r.title)}</span>
     <span class="tm"><span>💬 ${r.n_posts}</span><span>@${esc(persona("OP", r.title).nick)}</span>${extra(r)}</span></a></li>`).join("");
   $("#trending").innerHTML = trend(rows, (r) => `#archivo/${r.thread_id}`, () => "");
