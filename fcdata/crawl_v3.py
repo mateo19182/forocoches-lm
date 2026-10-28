@@ -29,6 +29,8 @@ _PLACEHOLDER_RE = re.compile(r"\[cita=\x00(\d+)\x00\]")
 _MENTION_RE = re.compile(r"(?<![\w@])@+(\w(?:[\w.-]{0,30}\w)?)")
 # Quote headers the parser leaves as text ("Cita de nick [enlace showthread]").
 _CITA_DE_RE = re.compile(r"Cita de (.{1,40}?) \[enlace showthread\]")
+# Older pages put the quoted nick first in the post with no link: "#3 OP: Cita de nick quoted text".
+_LEGACY_CITA_RE = re.compile(r"((?:^|\n)#\d+ (?:OP|forero_[a-z]+): Cita de )([^\s\[\]]+)(?= )")
 _ESCRITO_RE = re.compile(r"(Escrito originalmente por) ([^\n\[\]]{1,40})")
 _TITLE_SUFFIX_RE = re.compile(r"\s*[-|]\s*ForoCoches.*$", re.I)
 _YEAR_RE = re.compile(r"-(\d{4})")
@@ -154,6 +156,7 @@ def mask_unmapped(text):
     keep = lambda name: name if _PSEUDONYM.match(name) else 'usuario'
     text = _ESCRITO_RE.sub(lambda m: f"{m.group(1)} {keep(m.group(2).strip())}", text)
     text = _CITA_DE_RE.sub(lambda m: f"Cita de {keep(m.group(1))} [enlace showthread]", text)
+    text = _LEGACY_CITA_RE.sub(lambda m: m.group(1) + keep(m.group(2)), text)
     return _MENTION_RE.sub(lambda m: '@' + keep(m.group(1)), text)
 
 

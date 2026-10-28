@@ -62,7 +62,9 @@ function postDate(seed, i) {  // the thread opened yesterday evening; replies tr
 const nick = (a, seed) => `<span class="nk">${esc(persona(a, seed).nick)}</span>`;
 const renderBody = (text, seed = "") => esc(text)
   .replace(/(?<!\[cita=)\b(OP|forero_[a-z])\b(?!\])/g, (a) => nick(a, seed))  // mentions inside the text
-  .replace(/\[cita=([^\]]+)\]([\s\S]*?)\[\/cita\]\n?/g, (_, a, q) => `<blockquote><b>${nick(a, seed)}</b> ${q}</blockquote>`);
+  .replace(/\[cita=([^\]]+)\]([\s\S]*?)\[\/cita\]\n?/g, (_, a, q) => `<blockquote${q.length > 400 ? ' class="long"' : ""}><b>${nick(a, seed)}</b> ${q}</blockquote>`);
+// long quotes start collapsed, like the forum's; a click opens them
+document.addEventListener("click", (e) => { const q = e.target.closest("blockquote.long"); if (q) q.classList.toggle("open"); });
 
 function postEl(i, author, body, { live = false, citable = false, seed = "" } = {}) {
   const p = author.includes("?") || author === "…" ? { nick: "…", rango: "", hue: 0 } : persona(author, seed);
@@ -88,7 +90,7 @@ const TIPO_DESC = {
 const row = (k, cells, n, d = "") => `<tr><td class="k">${k}</td><td><div class="track">${cells}</div></td><td class="n">${n}</td>${d ? `<td class="d">${d}</td>` : ""}</tr>`;
 
 async function intro() {
-  const [s, rows, gen, curves] = await Promise.all(["/api/stats", "/api/threads?limit=5", "/api/generated?limit=5", "/api/curves"].map((u) => fetch(u).then((r) => r.json())));
+  const [s, rows, gen, curves] = await Promise.all(["/static/data/stats.json", "/api/threads?limit=5", "/api/generated?limit=5", "/static/data/curves.json"].map((u) => fetch(u).then((r) => r.json())));
   $("#i-total").innerHTML = `<b>${fmt(s.total.n)} hilos</b> ${fmt(s.total.posts)} posts, ${(s.total.chars / 1e6).toLocaleString("es-ES", { maximumFractionDigits: 0 })} millones de caracteres`;
   const trend = (list, href, extra) => list.map((r, i) => `<li><a href="${href(r)}"><b>${i + 1}</b><span class="tt">${esc(r.title)}</span>
     <span class="tm"><span>💬 ${r.n_posts}</span><span>@${esc(persona("OP", r.title).nick)}</span>${extra(r)}</span></a></li>`).join("");
@@ -100,7 +102,7 @@ async function intro() {
   const order = Object.entries(tipos).sort((a, b) => b[1] - a[1]), max = order[0][1];
   $("#i-tipos").innerHTML = order.map(([t, n]) => row(t, `<div class="seg${t === "compraventa" ? " b" : ""}" style="width:${(100 * n) / max}%"></div>`, `<b>${fmt(n)}</b>`, TIPO_DESC[t] ?? "")).join("");
   drawCurves(curves);
-  if (Object.values(curves).some((r) => r.live)) setInterval(async () => drawCurves(await (await fetch("/api/curves")).json()), 60000);
+  if (Object.values(curves).some((r) => r.live)) setInterval(async () => drawCurves(await (await fetch("/static/data/curves.json", { cache: "no-cache" })).json()), 60000);
 }
 
 function drawCurves(runs) {
@@ -443,10 +445,11 @@ async function browse() {
   $("#b-list").innerHTML = rows.length ? "" : `<li class="empty">Ningún título con eso.</li>`;
   for (const r of rows) {
     $("#b-list").appendChild(el(`<li><a href="#archivo/${r.thread_id}"><span class="t">${esc(r.title)}</span>
-      <span class="m">${r.tipo ?? "?"} · ${r.calidad ?? "?"} · <b>${r.n_posts}</b> posts</span></a></li>`));
+      <span class="m">${r.tipo ?? "?"} · ${r.calidad ?? "?"}${r.year ? " · " + r.year : ""} · <b>${r.n_posts}</b> posts</span></a></li>`));
   }
 }
 
+const SOURCES = { archive: "archivo 2019–2020", "crawl-2026": "crawl 2026", public: "crawl público 2026" };
 let current = null, currentSrc = "threads";
 async function openThread(id, src = "threads") {
   current = await (await fetch(`/api/${src}/${id}`)).json();
@@ -456,7 +459,7 @@ async function openThread(id, src = "threads") {
   $("#b-back").textContent = src === "generated" ? "‹ inicio" : "‹ archivo";
   $("#b-back").href = src === "generated" ? "#" : "#archivo";
   $("#b-meta").textContent = src === "generated" ? `generado por ${current.model || "el modelo"}${current.tipo ? " · " + current.tipo : ""} · ${current.posts.length} posts`
-    : `${current.tipo ?? "?"} · ${current.calidad ?? "?"} · ${current.posts.length} posts${current.tags ? " · " + current.tags : ""}`;
+    : `${current.tipo ?? "?"} · ${current.calidad ?? "?"}${current.year ? " · " + current.year : ""} · ${current.posts.length} posts${current.tags ? " · " + current.tags : ""} · ${SOURCES[current.source] ?? "archivo"}`;
   renderPosts($("#b-posts"), current.posts, { seed: current.title });
   window.scrollTo({ top: 0 });
 }
@@ -466,7 +469,7 @@ $("#b-play").onclick = () => (location.hash = currentSrc === "generated" ? `cont
 
 // ---------------------------------------------------------------- the numbers
 async function stats() {
-  const s = await (await fetch("/api/stats")).json();
+  const s = await (await fetch("/static/data/stats.json")).json();
   $("#s-total").textContent = `${fmt(s.total.n)} hilos, ${fmt(s.total.posts)} posts, ${(s.total.chars / 1e6).toLocaleString("es-ES", { maximumFractionDigits: 0 })} millones de caracteres.`;
 
   const tipos = {};
@@ -483,7 +486,7 @@ async function stats() {
     const rows = Object.entries(m).filter(([k, v]) => !k.startsWith("_") && v.mtok >= 0.1).sort((a, b) => b[1].mtok - a[1].mtok);
     const mx = rows[0][1].mtok;
     $("#s-mix").innerHTML = rows.map(([t, v]) => row(t, `<div class="seg" style="width:${(100 * v.mtok) / mx}%"></div>`, `<b>${v.mtok.toFixed(1)}</b> M`)).join("");
-    $("#s-mix-note").textContent = `${name}: ${m._total_mtok} M tokens en total · ${fmt(m._val_threads)} hilos reservados para validación · ${fmt(m._dedup_dropped)} duplicados fuera`;
+    $("#s-mix-note").textContent = `${name}: ${m._total_mtok} M tokens en total · ${fmt(m._val_threads)} hilos reservados para validación${m._dedup_dropped ? ` · ${fmt(m._dedup_dropped)} duplicados fuera` : ""}`;
     $("#s-mix-tabs").querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.textContent === name));
   };
   $("#s-mix-tabs").innerHTML = names.map((n) => `<button type="button">${n}</button>`).join("");
@@ -502,6 +505,24 @@ async function stats() {
     if (i === 1 || i % 5 === 0) svg += `<text x="${x + bw / 2}" y="${H - 6}" text-anchor="middle">${i}</text>`;
   }
   $("#s-hist").innerHTML = svg;
+
+  // threads per year, stacked by source: the archive is a 2019–2020 block, the crawl covers 2003–2026
+  const ys = {};
+  for (const r of s.years) if (r.year) (ys[r.year] ??= {})[r.source] = r.n;
+  const yk = Object.keys(ys).map(Number).sort((a, b) => a - b), ym = Math.max(...yk.map((y) => Object.values(ys[y]).reduce((a, b) => a + b, 0)));
+  const yw = (600 - 2 * (yk.length - 1)) / yk.length;
+  let ysvg = `<line x1="0" y1="118.5" x2="600" y2="118.5"/>`;
+  yk.forEach((y, i) => {
+    let top = 118;
+    const x = i * (yw + 2);
+    for (const [src, cls] of [["archive", "b"], ["public", "m"], ["crawl-2026", ""]]) {
+      const n = ys[y][src] ?? 0, h = (100 * n) / ym;
+      if (n) ysvg += `<rect class="${cls}" x="${x}" y="${top - h}" width="${yw}" height="${h}"><title>${y} · ${SOURCES[src]}: ${fmt(n)} hilos</title></rect>`;
+      top -= h;
+    }
+    if (y % 5 === 0 || i === 0 || i === yk.length - 1) ysvg += `<text x="${x + yw / 2}" y="134" text-anchor="middle">${y}</text>`;
+  });
+  $("#s-years").innerHTML = ysvg;
 
   const porder = ["1", "2", "3-5", "6-10", "11-30", "31+"];
   const pages = s.pages.sort((a, b) => porder.indexOf(a.pages_bucket) - porder.indexOf(b.pages_bucket));

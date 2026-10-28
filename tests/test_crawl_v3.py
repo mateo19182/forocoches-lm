@@ -61,6 +61,12 @@ class MaskTests(unittest.TestCase):
         self.assertEqual(mask_unmapped(text), '#2 forero_a: Cita de usuario [enlace showthread] hola @OP y @usuario, tod@s. '
                                               'Cita de forero_b [enlace showthread] y @forero_c')
 
+    def test_mask_unmapped_legacy_quote_header(self):
+        from fcdata.crawl_v3 import mask_unmapped
+        text = '#1 OP: Hola\n\n#2 forero_a: Cita de Bandal Yo de ti miraría\n\n#3 OP: Cita de forero_a Vale. Cita de Pepe no'
+        self.assertEqual(mask_unmapped(text), '#1 OP: Hola\n\n#2 forero_a: Cita de usuario Yo de ti miraría\n\n'
+                                              '#3 OP: Cita de forero_a Vale. Cita de Pepe no')
+
 
 class YearHeaderTests(unittest.TestCase):
     def test_year_header_field(self):

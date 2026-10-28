@@ -90,7 +90,8 @@ story might.** Published: `mateo-19182/forocoches-lm-v2` (bf16), `-q4f16_1-MLC` 
   on this server has no f16, so test it from the laptop or phone.
 - The public site is browser-only (`cf-connecting-ip` ⇒ no server GPU); Tailscale gets the server models too. New
   versions appear on the Tailscale side as soon as `data/web/mlc/<v>` exists, and in public once in `HF_REPOS`.
-- `/api/curves` reads `checkpoint-*/trainer_state.json`; if checkpoints are deleted it falls back to parsing
+- `web/export_static.py` writes the loss curves and dataset numbers to `web/static/data/`; rerun it after a run or an
+  index rebuild. Curves come from `checkpoint-*/trainer_state.json`; if checkpoints are deleted it falls back to parsing
   `runs/<v>.log`, which is sparser. Keep the last checkpoint dir (or copy its `trainer_state.json` next to `final/`).
 
 ## Plan for v3 (proposal)

@@ -28,7 +28,7 @@
 <main id="page-intro" class="page grid" hidden>
   <section class="card hero">
     <h1>Un modelo que escribe hilos de Forocoches</h1>
-    <p class="lead">Gemma 3 1B con full fine-tune sobre medio millón de hilos del archivo histórico (2018–2019). Títulos, OPs y respuestas, con el tipo de hilo que le pidas.
+    <p class="lead">Gemma 3 1B con full fine-tune sobre hilos de 2003 a 2026: el archivo histórico y un crawl propio de todos los hilos con posts largos. Títulos, OPs y respuestas, con el tipo de hilo y el año que le pidas.
       La generación corre en tu navegador.</p>
     <p class="ctas"><a class="pill solid" href="#generar">Generar un hilo</a></p>
   </section>
@@ -39,6 +39,7 @@
       <p id="i-total" class="num"></p>
       <p>Archivo público 2019–2020 (<a class="lnk" href="https://github.com/Atenrev/forocoches-language-generation">Atenrev/forocoches-language-generation</a>), hasta 30 posts por hilo,
         y desde v3 un crawl propio de octubre de 2026 de todos los hilos con posts largos, de 2003 a 2026. Cada hilo lleva un tipo y un año que el modelo aprende a seguir.</p>
+      <p class="dim small">v3 se entrenó con 249.232 de ellos: historias, preguntas, debates, humor e hipotéticos de calidad media o alta, sin duplicados.</p>
       <details class="fold">
         <summary>Categorías</summary>
         <table class="bars" id="i-tipos"></table>
@@ -79,7 +80,7 @@
       <h2>Enlaces</h2>
       <p><b>Usado</b>
         <a class="pill small" href="https://huggingface.co/google/gemma-3-1b-pt">Gemma 3 1B pt · modelo base</a>
-        <a class="pill small" href="https://github.com/Atenrev/forocoches-language-generation">Archivo FC 2018–2019 · dataset</a>
+        <a class="pill small" href="https://github.com/Atenrev/forocoches-language-generation">Archivo FC 2019–2020 · dataset</a>
         <a class="pill small" href="https://huggingface.co/datasets/HuggingFaceFW/fineweb-2">FineWeb-2 · replay</a>
         <a class="pill small" href="https://github.com/mlc-ai/web-llm">WebLLM · inferencia</a>
         <a class="pill small" href="https://huggingface.co/scratchyone/anon-1b">anon-1b · inspiración</a></p>
@@ -198,6 +199,9 @@
     <h2>tokens de entrenamiento <span class="segs" id="s-mix-tabs"></span></h2>
     <table class="bars" id="s-mix"></table>
     <p id="s-mix-note" class="dim small"></p>
+    <h2>hilos por año <span class="dim">del OP</span></h2>
+    <svg id="s-years" class="hist" viewBox="0 0 600 140" preserveAspectRatio="none"></svg>
+    <p class="dim small legend"><i class="sw"></i> crawl 2026 <i class="sw m"></i> crawl público <i class="sw b"></i> archivo (año estimado por id)</p>
     <h2>posts por hilo</h2>
     <svg id="s-hist" class="hist" viewBox="0 0 600 140" preserveAspectRatio="none"></svg>
     <h2>páginas por hilo</h2>
