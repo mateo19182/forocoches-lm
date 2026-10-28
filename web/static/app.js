@@ -111,7 +111,7 @@ function drawCurves(runs) {
   const names = Object.keys(runs).filter((k) => runs[k].train.length);
   const toM = (r, step) => (step * r.tokens_per_step) / 1e6;
   const xmax = Math.max(...names.map((k) => toM(runs[k], runs[k].max_steps ?? runs[k].train.at(-1)[0])));
-  const ys = names.flatMap((k) => [...runs[k].eval.map((p) => p[1]), ...runs[k].train.slice(5).map((p) => p[1])]);
+  const ys = names.flatMap((k) => runs[k].train.slice(5).map((p) => p[1]));
   const ymin = Math.floor(Math.min(...ys) * 10) / 10, ymax = Math.min(Math.ceil(Math.max(...ys) * 10) / 10, ymin + 0.8);
   const X = (m) => L + ((W - L - R) * m) / xmax, Y = (v) => T + ((H - T - B) * (ymax - Math.min(Math.max(v, ymin), ymax))) / (ymax - ymin);
   let svg = "";
@@ -122,8 +122,7 @@ function drawCurves(runs) {
     const r = runs[k], c = colors[k] ?? "#3fafbc";
     let ema = null;
     const train = r.train.map(([s, l]) => { ema = ema === null ? l : ema * 0.85 + l * 0.15; return [X(toM(r, s)), Y(ema)]; });
-    svg += `<path d="${path(train)}" stroke="${c}" stroke-width="1" opacity=".45"/>`;
-    svg += `<path d="${path(r.eval.map(([s, l]) => [X(toM(r, s)), Y(l)]))}" stroke="${c}" stroke-width="2.5"/>`;
+    svg += `<path d="${path(train)}" stroke="${c}" stroke-width="1.5"/>`;
   }
   $("#curves").innerHTML = svg;
   const live = (l) => l ? ` · <b>entrenando ahora</b>: ${(100 * l.step / l.max_steps).toFixed(0)}%, termina ~${new Date(l.eta * 1000).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}` : "";
