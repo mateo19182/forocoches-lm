@@ -228,7 +228,7 @@ def db():
     return con
 
 
-def where(tipo, calidad):
+def where(tipo, calidad, year):
     conds, params = [], []
     if tipo:
         conds.append("t.tipo = ?")
@@ -236,14 +236,17 @@ def where(tipo, calidad):
     if calidad:
         conds.append("t.calidad = ?")
         params.append(calidad)
+    if year:
+        conds.append("t.year = ?")
+        params.append(year)
     return conds, params
 
 
 @app.get("/api/threads")
-def api_threads(tipo: str = "", calidad: str = "", q: str = "", limit: int = 24, offset: int = 0):
+def api_threads(tipo: str = "", calidad: str = "", year: int | None = None, q: str = "", limit: int = 24, offset: int = 0):
     con = db()
     cols = "t.thread_id, t.tipo, t.calidad, t.title, t.n_posts, t.chars, t.pages_bucket, t.year"
-    conds, params = where(tipo, calidad)
+    conds, params = where(tipo, calidad, year)
     if q.strip():
         # FTS prefix match on every word of the query
         match = " ".join(f'"{w}"*' for w in q.replace('"', "").split())
@@ -251,8 +254,8 @@ def api_threads(tipo: str = "", calidad: str = "", q: str = "", limit: int = 24,
         params = [match] + params
         sql += "".join(f" AND {c}" for c in conds) + " ORDER BY rank LIMIT ? OFFSET ?"
     else:
-        # sample ids from the small (tipo, calidad) index: ORDER BY random() on the table reads all 4 GB of it
-        sql = f"SELECT {cols} FROM threads t WHERE t.thread_id IN (SELECT thread_id FROM threads t INDEXED BY idx_tipo_calidad"
+        # sample ids from the small covering index: ORDER BY random() on the table reads all 4 GB of it
+        sql = f"SELECT {cols} FROM threads t WHERE t.thread_id IN (SELECT thread_id FROM threads t INDEXED BY idx_tipo_calidad_year"
         if conds:
             sql += " WHERE " + " AND ".join(conds)
         sql += " ORDER BY random() LIMIT ? OFFSET ?)"

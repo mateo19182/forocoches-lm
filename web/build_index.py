@@ -25,6 +25,7 @@ CREATE TABLE threads (
 );
 CREATE INDEX idx_tipo_calidad ON threads(tipo, calidad);
 CREATE INDEX idx_year ON threads(year);
+CREATE INDEX idx_tipo_calidad_year ON threads(tipo, calidad, year);
 CREATE VIRTUAL TABLE titles USING fts5(title, content='threads', content_rowid='thread_id', tokenize='unicode61 remove_diacritics 2');
 """
 

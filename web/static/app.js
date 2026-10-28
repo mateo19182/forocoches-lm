@@ -19,7 +19,7 @@ function route() {
     $("#stats").hidden = reading;
     $("#page-archivo").classList.toggle("reading", reading);
     if (id) openThread(+id, name === "generado" ? "generated" : "threads");
-    else { $("#b-view").hidden = true; $("#b-list").hidden = false; if (!$("#b-list").children.length) browse(); }
+    else { $("#b-view").hidden = true; $("#b-list").hidden = !$("#b-list").children.length; }  // threads only once asked for
     if (!$("#s-total").textContent) stats();
   }
 }
@@ -425,7 +425,7 @@ async function gpuStatus() {
 }
 
 // ---------------------------------------------------------------- archivo
-const filter = { tipo: "", calidad: "" };
+const filter = { tipo: "", calidad: "", year: "" };
 function segs(container, key, values, all) {
   container.innerHTML = [["", all], ...values.map((v) => [v, v])].map(([v, t]) => `<button type="button" data-v="${v}" class="${v === filter[key] ? "on" : ""}">${t}</button>`).join("");
   container.onclick = (e) => {
@@ -559,6 +559,8 @@ async function stats() {
   $("#tipo").value = "historia"; $("#calidad").value = "alta";
   segs($("#f-tipo"), "tipo", m.tipos, "todos los tipos");
   segs($("#f-calidad"), "calidad", m.calidades, "toda calidad");
+  $("#b-year").innerHTML = [["", "todos los años"], ...(m.anios ?? []).map((y) => [y, y])].map(([v, t]) => `<option value="${v}">${t}</option>`).join("");
+  $("#b-year").onchange = () => { filter.year = $("#b-year").value; browse(); };
   redraw();
   gpuStatus();
   route();

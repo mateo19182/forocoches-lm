@@ -175,22 +175,11 @@
       <input id="b-q" class="search" placeholder="Buscar en los títulos" autocomplete="off">
       <div class="segs col" id="f-tipo"></div>
       <div class="segs col" id="f-calidad"></div>
-      <button id="b-random" class="btn dim" type="button">otros al azar</button>
+      <div class="field"><select id="b-year"></select></div>
+      <button id="b-random" class="btn dim" type="button">hilos al azar</button>
     </div>
   </aside>
-  <ol id="b-list" class="rows card"></ol>
-
-  <article id="b-view" class="doc" hidden>
-    <div class="viewhead">
-      <a id="b-back" href="#archivo" class="dim">‹ archivo</a>
-      <span id="b-meta" class="dim small meta"></span>
-      <span class="grow"></span>
-      <button id="b-play" class="pill solid small" type="button">Continuar con el modelo</button>
-    </div>
-    <div class="card titleline"><h1 id="b-title"></h1><span class="pages">«&nbsp;&nbsp;&nbsp;‹&nbsp;&nbsp;&nbsp;<b>1</b>&nbsp;&nbsp;&nbsp;›&nbsp;&nbsp;&nbsp;»</span></div>
-    <ol id="b-posts" class="posts"></ol>
-  </article>
-
+  <ol id="b-list" class="rows card" hidden></ol>
   <section id="stats" class="card stats">
     <p id="s-total" class="lede"></p>
     <h2>hilos por tipo <span class="dim">y calidad de la etiqueta</span></h2>
@@ -207,6 +196,18 @@
     <h2>páginas por hilo</h2>
     <table class="bars" id="s-pages"></table>
   </section>
+
+  <article id="b-view" class="doc" hidden>
+    <div class="viewhead">
+      <a id="b-back" href="#archivo" class="dim">‹ archivo</a>
+      <span id="b-meta" class="dim small meta"></span>
+      <span class="grow"></span>
+      <button id="b-play" class="pill solid small" type="button">Continuar con el modelo</button>
+    </div>
+    <div class="card titleline"><h1 id="b-title"></h1><span class="pages">«&nbsp;&nbsp;&nbsp;‹&nbsp;&nbsp;&nbsp;<b>1</b>&nbsp;&nbsp;&nbsp;›&nbsp;&nbsp;&nbsp;»</span></div>
+    <ol id="b-posts" class="posts"></ol>
+  </article>
+
 </main>
 
 <script src="/static/app.js"></script>
