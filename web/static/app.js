@@ -126,7 +126,7 @@ function drawCurves(runs) {
   }
   $("#curves").innerHTML = svg;
   const live = (l) => l ? ` · <b>entrenando ahora</b>: ${(100 * l.step / l.max_steps).toFixed(0)}%, termina ~${new Date(l.eta * 1000).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}` : "";
-  $("#curves-legend").innerHTML = names.map((k) => `<span><i class="sw" style="background:${colors[k] ?? "#3fafbc"}"></i> ${k}: validación ${runs[k].eval.at(-1)?.[1].toFixed(3) ?? "—"} en ${fmt(toM(runs[k], runs[k].train.at(-1)[0]))}M tokens${live(runs[k].live)}</span>`).join("");
+  $("#curves-legend").innerHTML = names.map((k) => `<span><i class="sw" style="background:${colors[k] ?? "#3fafbc"}"></i> ${k}: ${fmt(toM(runs[k], runs[k].train.at(-1)[0]))}M tokens${live(runs[k].live)}</span>`).join("");
 }
 
 // ---------------------------------------------------------------- playground
@@ -516,7 +516,7 @@ async function stats() {
     ysvg += `<rect x="${x}" y="${118 - h}" width="${yw}" height="${h}"><title>${y}: ${fmt(n)} hilos</title></rect>`;
     if (y % 5 === 0 || i === 0) ysvg += `<text x="${x + yw / 2}" y="134" text-anchor="middle">${y}</text>`;
   });
-  $("#s-years-note").textContent = `Aparte, el archivo: ${fmt(archive)} hilos de 2019–2020, todos los de su rango de ids, sin filtrar por longitud.`;
+  $("#s-years-note").textContent = `El archivo (${fmt(archive)} hilos) es de 2019–2020 y no entra en la gráfica.`;
   $("#s-years").innerHTML = ysvg;
 
   const porder = ["1", "2", "3-5", "6-10", "11-30", "31+"];

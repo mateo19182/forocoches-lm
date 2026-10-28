@@ -37,9 +37,9 @@
     <article class="card">
       <h2>Datos</h2>
       <p id="i-total" class="num"></p>
-      <p>Archivo público 2019–2020 (<a class="lnk" href="https://github.com/Atenrev/forocoches-language-generation">Atenrev/forocoches-language-generation</a>), hasta 30 posts por hilo,
-        y desde v3 un crawl propio de octubre de 2026 de todos los hilos con posts largos, de 2003 a 2026. Cada hilo lleva un tipo y un año que el modelo aprende a seguir.</p>
-      <p class="dim small">v3 se entrenó con 249.232 de ellos: historias, preguntas, debates, humor e hipotéticos de calidad media o alta, sin duplicados.</p>
+      <p>Archivo público 2019–2020 (<a class="lnk" href="https://github.com/Atenrev/forocoches-language-generation">Atenrev/forocoches-language-generation</a>) y, desde v3, un crawl propio de octubre de 2026 que recorrió todos los ids del foro (2003–2026).
+        De cada hilo, solo la primera página. Del crawl, solo los hilos con algún post de 2.000 caracteres o más, y de ellos ese post y los del OP. Cada hilo lleva un tipo y un año que el modelo aprende a seguir.</p>
+      <p class="dim small">Para entrenar v3: tipo y calidad etiquetados con Claude Haiku; solo historias, preguntas, debates, humor e hipotéticos de calidad media o alta, sin duplicados. 249.232 hilos.</p>
       <details class="fold">
         <summary>Categorías</summary>
         <table class="bars" id="i-tipos"></table>
@@ -58,7 +58,7 @@
     <article class="card wide two">
       <div>
         <h2>Loss</h2>
-        <p class="dim small">Loss de training por token (suavizada) frente a millones de tokens vistos. La leyenda da la de validación final, cada versión sobre su propio validation set.</p>
+        <p class="dim small">Loss de training por token (suavizada) frente a millones de tokens vistos. Cada versión con sus propios datos: los de v3 son sobre todo historias largas y un 10% de español general, más difíciles de predecir que las respuestas cortas del archivo. Por eso su curva sale más alta aunque el modelo es mejor: en los mismos 4.873 hilos, perplexity 6,54 frente a 6,81 de v2.</p>
         <svg id="curves" class="curves" viewBox="0 0 720 240"></svg>
         <p id="curves-legend" class="legend small"></p>
       </div>
@@ -182,7 +182,7 @@
   <ol id="b-list" class="rows card" hidden></ol>
   <section id="stats" class="card stats">
     <p id="s-total" class="lede"></p>
-    <p class="dim small">Dos fuentes, filtradas distinto: el archivo 2019–2020 tiene todos los hilos de su rango, hasta 30 posts por hilo; el crawl 2026 cubre 2003–2026 pero solo hilos con posts largos, y de ellos solo esos posts.</p>
+    <p class="dim small">Solo la primera página de cada hilo. El crawl 2026 recorrió los 10,8 M ids y guardó los hilos con algún post de 2.000+ caracteres: ese post, el OP y los demás posts del OP.</p>
     <h2>hilos por tipo <span class="dim">y calidad de la etiqueta</span></h2>
     <table class="bars" id="s-tipos"></table>
     <p class="dim small legend"><i class="sw a"></i> alta <i class="sw m"></i> media <i class="sw b"></i> baja</p>
