@@ -81,9 +81,6 @@ def stats():
     by = [dict(r) for r in con.execute(
         "SELECT coalesce(tipo, '?') tipo, coalesce(calidad, '?') calidad, count(*) n, sum(chars) chars "
         "FROM threads GROUP BY 1, 2")]
-    hist = [dict(r) for r in con.execute(
-        "SELECT coalesce(tipo, '?') tipo, min(n_posts, 60) n_posts, count(*) n FROM threads WHERE source = 'archive' GROUP BY 1, 2")]
-    pages = [dict(r) for r in con.execute("SELECT pages_bucket, count(*) n FROM threads WHERE source = 'archive' GROUP BY 1")]
     years = [dict(r) for r in con.execute("SELECT year, source, count(*) n FROM threads GROUP BY 1, 2")]
     total = con.execute("SELECT count(*) n, sum(chars) chars, sum(n_posts) posts FROM threads").fetchone()
     con.close()
@@ -91,7 +88,7 @@ def stats():
     mixes = {p.parent.name: s for p in sorted(ROOT.glob("data/mix/v*/summary.json"))
              if "_total_mtok" in (s := json.loads(p.read_text()))}
     mixes["v3"] = mix_v2_stats(ROOT / "data/mix/v3/summary.json")
-    return {"total": dict(total), "by_tipo_calidad": by, "posts_hist": hist, "pages": pages, "years": years,
+    return {"total": dict(total), "by_tipo_calidad": by, "years": years,
             "crawl_years": crawl_years(), "mixes": mixes}
 
 

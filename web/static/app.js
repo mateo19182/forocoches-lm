@@ -492,19 +492,6 @@ async function stats() {
   $("#s-mix-tabs").onclick = (e) => { const b = e.target.closest("button"); if (b) showMix(b.textContent); };
   if (names.length) showMix(names[names.length - 1]);
 
-  // posts per thread, archive only: it keeps up to 30 posts per thread, the crawl only the long ones
-  const top = Math.max(...s.posts_hist.map((r) => r.n_posts));
-  const hist = Array(top + 1).fill(0);
-  for (const r of s.posts_hist) hist[r.n_posts] += r.n;
-  const hm = Math.max(...hist), W = 600, H = 140, base = 118, gap = 2, bw = (W - gap * (top - 1)) / top;
-  let svg = `<line x1="0" y1="${base + 0.5}" x2="${W}" y2="${base + 0.5}"/>`;
-  for (let i = 1; i <= top; i++) {
-    const h = (100 * hist[i]) / hm, x = (i - 1) * (bw + gap);
-    svg += `<rect x="${x}" y="${base - h}" width="${bw}" height="${h}"><title>${i} posts: ${fmt(hist[i])} hilos</title></rect>`;
-    if (i === 1 || i % 5 === 0) svg += `<text x="${x + bw / 2}" y="${H - 6}" text-anchor="middle">${i}</text>`;
-  }
-  $("#s-hist").innerHTML = svg;
-
   // threads per year in the 2026 crawl: one selection (long posts) over 2003–2026. The archive is every thread of a
   // 2019–2020 id range, so drawing it in would show the sampling, not the forum
   const archive = s.years.filter((r) => r.source === "archive").reduce((a, r) => a + r.n, 0);
@@ -518,12 +505,6 @@ async function stats() {
   });
   $("#s-years-note").textContent = `El archivo (${fmt(archive)} hilos) es de 2019–2020 y no entra en la gráfica.`;
   $("#s-years").innerHTML = ysvg;
-
-  const porder = ["1", "2", "3-5", "6-10", "11-30", "31+"];
-  // the 2026 crawl kept only the long posts, so its threads have no page count ("unknown")
-  const pages = s.pages.filter((p) => p.pages_bucket !== "unknown").sort((a, b) => porder.indexOf(a.pages_bucket) - porder.indexOf(b.pages_bucket));
-  const pm = Math.max(...pages.map((p) => p.n));
-  $("#s-pages").innerHTML = pages.map((p) => row(p.pages_bucket, `<div class="seg" style="width:${(100 * p.n) / pm}%"></div>`, `<b>${fmt(p.n)}</b>`)).join("");
 }
 
 // ---------------------------------------------------------------- init
