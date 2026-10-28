@@ -37,8 +37,8 @@
     <article class="card">
       <h2>Datos</h2>
       <p id="i-total" class="num"></p>
-      <p>Archivo público 2018–2019 (<a class="lnk" href="https://github.com/Atenrev/forocoches-language-generation">Atenrev/forocoches-language-generation</a>), hasta 30 posts por hilo.
-        Más scraping propio en 2026, que entra en la siguiente versión. Cada hilo lleva un tipo que el modelo aprende a seguir.</p>
+      <p>Archivo público 2019–2020 (<a class="lnk" href="https://github.com/Atenrev/forocoches-language-generation">Atenrev/forocoches-language-generation</a>), hasta 30 posts por hilo,
+        y desde v3 un crawl propio de octubre de 2026 de todos los hilos con posts largos, de 2003 a 2026. Cada hilo lleva un tipo y un año que el modelo aprende a seguir.</p>
       <details class="fold">
         <summary>Categorías</summary>
         <table class="bars" id="i-tipos"></table>
@@ -49,8 +49,8 @@
       <ol class="steps">
         <li>HTML → texto plano: <code>TÍTULO</code>, <code>#n autor: texto</code>, citas <code>[cita=OP]…[/cita]</code>.</li>
         <li>Tipo y calidad de cada hilo con <a class="lnk" href="https://www.anthropic.com/claude/haiku">Claude Haiku</a>, leyendo el OP.</li>
-        <li>Mix: historias ×2, resto ×1, compraventa fuera, 8% replay de español general (<a class="lnk" href="https://huggingface.co/datasets/HuggingFaceFW/fineweb-2">FineWeb-2</a>, spa_Latn).</li>
-        <li>Full fine-tune de <a class="lnk" href="https://huggingface.co/google/gemma-3-1b-pt">Gemma 3 1B pt</a> en una RTX 3090: packed rows de 4.096 tokens, completion-only loss, el tipo condiciona y no se predice. v1 270 M tokens / 14 h; v2 496 M / 26 h.</li>
+        <li>Mix: historias ×2, resto ×1, compraventa fuera, ~10% replay de español general (<a class="lnk" href="https://huggingface.co/datasets/HuggingFaceFW/fineweb-2">FineWeb-2</a>, spa_Latn).</li>
+        <li>Full fine-tune de <a class="lnk" href="https://huggingface.co/google/gemma-3-1b-pt">Gemma 3 1B pt</a>, completion-only loss: la cabecera (tipo, año) condiciona y no se predice. v1 270 M tokens / 14 h y v2 496 M / 26 h en una RTX 3090 con filas de 4.096 tokens; v3 sigue desde v2 con 545 M más / 8 h en una RTX 5090 alquilada, con filas de 8.192.</li>
         <li>Eval: perplexity en hilos no vistos, y leer samples.</li>
       </ol>
     </article>
@@ -65,12 +65,12 @@
         <h2>Resultados</h2>
         <p class="dim small">Perplexity sobre 4.873 hilos del validation set. Menos es mejor.</p>
         <table class="tbl">
-          <tr><th></th><th>base</th><th>v1</th><th>v2</th></tr>
-          <tr><td>todo el foro</td><td>11,11</td><td>7,08</td><td><b>6,81</b></td></tr>
-          <tr><td>historias</td><td>11,88</td><td>7,87</td><td><b>7,63</b></td></tr>
-          <tr><td>humor</td><td>12,53</td><td>6,60</td><td><b>6,40</b></td></tr>
-          <tr><td>debate</td><td>11,42</td><td>7,24</td><td><b>7,01</b></td></tr>
-          <tr><td>español general</td><td>13,19</td><td>12,82</td><td>13,03</td></tr>
+          <tr><th></th><th>base</th><th>v1</th><th>v2</th><th>v3</th></tr>
+          <tr><td>todo el foro</td><td>11,11</td><td>7,08</td><td>6,81</td><td><b>6,54</b></td></tr>
+          <tr><td>historias</td><td>11,88</td><td>7,87</td><td>7,63</td><td><b>7,17</b></td></tr>
+          <tr><td>humor</td><td>12,53</td><td>6,60</td><td>6,40</td><td><b>6,25</b></td></tr>
+          <tr><td>debate</td><td>11,42</td><td>7,24</td><td>7,01</td><td><b>6,77</b></td></tr>
+          <tr><td>español general</td><td>13,19</td><td>12,82</td><td>13,03</td><td><b>10,68</b></td></tr>
         </table>
         <p class="dim small">Última fila: control, no pierde español general. v0 (52 M tokens) daba 7,65 en todo el foro.</p>
       </div>
@@ -84,10 +84,12 @@
         <a class="pill small" href="https://github.com/mlc-ai/web-llm">WebLLM · inferencia</a>
         <a class="pill small" href="https://huggingface.co/scratchyone/anon-1b">anon-1b · inspiración</a></p>
       <p><b>Creado</b>
-        <a class="pill small solid" href="https://huggingface.co/mateo-19182/forocoches-lm-v2">forocoches-lm v2 · modelo</a>
-        <a class="pill small solid" href="https://huggingface.co/mateo-19182/forocoches-lm-v2-q4f16_1-MLC">v2 · pesos para navegador</a>
+        <a class="pill small solid" href="https://huggingface.co/mateo-19182/forocoches-lm-v3">forocoches-lm v3 · modelo</a>
+        <a class="pill small solid" href="https://huggingface.co/mateo-19182/forocoches-lm-v3-q4f16_1-MLC">v3 · pesos para navegador</a>
         <a class="pill small solid" href="https://huggingface.co/datasets/mateo-19182/forocoches-threads-v3">forocoches-threads v3 · dataset</a>
         <a class="pill small solid" href="https://huggingface.co/datasets/mateo-19182/forocoches-crawl-2026">crawl 2026 · dataset</a>
+        <a class="pill small" href="https://huggingface.co/mateo-19182/forocoches-lm-v2">v2 · modelo</a>
+        <a class="pill small" href="https://huggingface.co/mateo-19182/forocoches-lm-v2-q4f16_1-MLC">v2 · pesos para navegador</a>
         <a class="pill small" href="https://huggingface.co/mateo-19182/forocoches-lm-v1-q4f16_1-MLC">v1 · pesos para navegador</a></p>
     </article>
   </section>
@@ -118,6 +120,7 @@
       <div class="fields">
         <div class="field"><span class="dim">tipo</span><select id="tipo"></select></div>
         <div class="field"><span class="dim">calidad</span><select id="calidad"></select></div>
+        <div class="field"><span class="dim">año</span><select id="anio"></select></div>
         <div class="field"><span class="dim">páginas</span><select id="paginas"></select></div>
         <div class="field"><span class="dim">etiquetas</span><input id="etiquetas" placeholder="+hd +tocho"></div>
       </div>

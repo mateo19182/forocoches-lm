@@ -100,11 +100,12 @@ async function intro() {
   const order = Object.entries(tipos).sort((a, b) => b[1] - a[1]), max = order[0][1];
   $("#i-tipos").innerHTML = order.map(([t, n]) => row(t, `<div class="seg${t === "compraventa" ? " b" : ""}" style="width:${(100 * n) / max}%"></div>`, `<b>${fmt(n)}</b>`, TIPO_DESC[t] ?? "")).join("");
   drawCurves(curves);
+  if (Object.values(curves).some((r) => r.live)) setInterval(async () => drawCurves(await (await fetch("/api/curves")).json()), 60000);
 }
 
 function drawCurves(runs) {
   const W = 720, H = 240, L = 36, R = 10, T = 10, B = 26;
-  const colors = { v0: "#b5b5b5", v1: "#333", v2: "#ff5845" };
+  const colors = { v0: "#b5b5b5", v1: "#333", v2: "#ff5845", v3: "#3fafbc" };
   const names = Object.keys(runs).filter((k) => runs[k].train.length);
   const toM = (r, step) => (step * r.tokens_per_step) / 1e6;
   const xmax = Math.max(...names.map((k) => toM(runs[k], runs[k].max_steps ?? runs[k].train.at(-1)[0])));
@@ -123,7 +124,8 @@ function drawCurves(runs) {
     svg += `<path d="${path(r.eval.map(([s, l]) => [X(toM(r, s)), Y(l)]))}" stroke="${c}" stroke-width="2.5"/>`;
   }
   $("#curves").innerHTML = svg;
-  $("#curves-legend").innerHTML = names.map((k) => `<span><i class="sw" style="background:${colors[k] ?? "#3fafbc"}"></i> ${k}: validación ${runs[k].eval.at(-1)?.[1].toFixed(3) ?? "—"} en ${fmt(toM(runs[k], runs[k].train.at(-1)[0]))}M tokens</span>`).join("");
+  const live = (l) => l ? ` · <b>entrenando ahora</b>: ${(100 * l.step / l.max_steps).toFixed(0)}%, termina ~${new Date(l.eta * 1000).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}` : "";
+  $("#curves-legend").innerHTML = names.map((k) => `<span><i class="sw" style="background:${colors[k] ?? "#3fafbc"}"></i> ${k}: validación ${runs[k].eval.at(-1)?.[1].toFixed(3) ?? "—"} en ${fmt(toM(runs[k], runs[k].train.at(-1)[0]))}M tokens${live(runs[k].live)}</span>`).join("");
 }
 
 // ---------------------------------------------------------------- playground
@@ -133,9 +135,9 @@ const save = () => { try { localStorage.setItem("fc-thread", JSON.stringify(stat
 function fitTitle() { const t = $("#title"); t.style.height = "0"; t.style.height = t.scrollHeight + "px"; }
 function redraw() { $("#title").value = state.title; fitTitle(); renderPosts($("#posts"), state.posts, { citable: true }); save(); shareState(); }
 
-// only the header fields the selected version was trained with (v2: tipo only); the others are hidden
+// only the header fields the selected version was trained with (v2: tipo; v3: tipo, año); the others are hidden
 let models = { fields: {} };
-const ALL_FIELDS = ["tipo", "calidad", "etiquetas", "paginas"];
+const ALL_FIELDS = ["tipo", "calidad", "anio", "etiquetas", "paginas"];
 const fieldsFor = (model) => models.fields[model.replace(/^gpu:/, "")] ?? ALL_FIELDS;
 const header = () => Object.fromEntries(ALL_FIELDS.map((k) => [k, fieldsFor($("#model").value).includes(k) ? $("#" + k).value : ""]));
 function showFields() {
@@ -249,7 +251,7 @@ async function localEngine(version, signal) {
 // the prompt format of web/threads.py, built here because the model runs here
 const MAX_PROMPT_CHARS = 12000;
 function headerText(h) {
-  const kept = [["tipo", h.tipo], ["calidad", h.calidad], ["etiquetas", h.etiquetas.trim()], ["páginas", h.paginas]].filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`);
+  const kept = [["tipo", h.tipo], ["calidad", h.calidad], ["año", h.anio], ["etiquetas", h.etiquetas.trim()], ["páginas", h.paginas]].filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`);
   return kept.length ? kept.join(" | ") + "\n\n" : "";
 }
 function threadText(title, posts) {
@@ -524,7 +526,7 @@ async function stats() {
   }));
   $("#model").innerHTML = m.versions.map((v) => `<option value="${v}">${v}</option>`).join("")
     + local.map((v) => `<option value="gpu:${v}">${v} · en tu navegador</option>`).join("");
-  const prefer = ["v2", "gpu:v2", "v1", "gpu:v1", `gpu:${local[local.length - 1]}`, m.versions[m.versions.length - 1]];
+  const prefer = ["v3", "gpu:v3", "v2", "gpu:v2", `gpu:${local[local.length - 1]}`, m.versions[m.versions.length - 1]];
   $("#model").value = prefer.find((v) => [...$("#model").options].some((o) => o.value === v)) ?? "";
   showFields();
   $("#model").onchange = () => { llmError = null; showFields(); gpuStatus(); };
@@ -533,7 +535,7 @@ async function stats() {
     modelHint("Sin WebGPU en este navegador no se puede generar.");
   }
   const opts = (vals) => `<option value="">—</option>` + vals.map((v) => `<option>${v}</option>`).join("");
-  $("#tipo").innerHTML = opts(m.tipos); $("#calidad").innerHTML = opts(m.calidades); $("#paginas").innerHTML = opts(m.paginas);
+  $("#tipo").innerHTML = opts(m.tipos); $("#calidad").innerHTML = opts(m.calidades); $("#paginas").innerHTML = opts(m.paginas); $("#anio").innerHTML = opts(m.anios ?? []);
   $("#tipo").value = "historia"; $("#calidad").value = "alta";
   segs($("#f-tipo"), "tipo", m.tipos, "todos los tipos");
   segs($("#f-calidad"), "calidad", m.calidades, "toda calidad");

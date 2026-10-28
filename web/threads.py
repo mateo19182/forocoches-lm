@@ -23,8 +23,8 @@ POST_RE = re.compile(r"^#(\d+) (OP|forero_[a-z]+): ?(.*)$", re.S)
 AUTHOR_RE = re.compile(r"^\s*(OP|forero_[a-z]+):\s?")
 
 
-def header(tipo="", calidad="", etiquetas="", paginas=""):
-    fields = [("tipo", tipo), ("calidad", calidad), ("etiquetas", etiquetas.strip()), ("páginas", paginas)]
+def header(tipo="", calidad="", anio="", etiquetas="", paginas=""):
+    fields = [("tipo", tipo), ("calidad", calidad), ("año", anio), ("etiquetas", etiquetas.strip()), ("páginas", paginas)]
     kept = [f"{k}: {v}" for k, v in fields if v]
     return " | ".join(kept) + "\n\n" if kept else ""
 

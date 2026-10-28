@@ -31,10 +31,12 @@ IDLE_UNLOAD_S = 10 * 60
 MAX_LOADED = 2
 # Browser weights published for the public site (forocoches.m19182.dev, through a Cloudflare tunnel). Public
 # visitors only get these: the server GPU is reachable from Tailscale alone.
-HF_REPOS = {"v1": "mateo-19182/forocoches-lm-v1-q4f16_1-MLC", "v2": "mateo-19182/forocoches-lm-v2-q4f16_1-MLC"}
-# header fields each version was trained with; v2's mix was built with `--fields tipo`
-ALL_FIELDS = ("tipo", "calidad", "etiquetas", "paginas")
-HEADER_FIELDS = {"v2": ("tipo",)}
+HF_REPOS = {"v1": "mateo-19182/forocoches-lm-v1-q4f16_1-MLC", "v2": "mateo-19182/forocoches-lm-v2-q4f16_1-MLC",
+            "v3": "mateo-19182/forocoches-lm-v3-q4f16_1-MLC"}
+# header fields each version was trained with; v2's mix was built with `--fields tipo`, v3's with `tipo año`
+ALL_FIELDS = ("tipo", "calidad", "anio", "etiquetas", "paginas")
+HEADER_FIELDS = {"v2": ("tipo",), "v3": ("tipo", "anio")}
+ANIOS = [str(y) for y in range(2026, 2002, -1)]
 
 
 def header_fields(version):
@@ -97,6 +99,7 @@ store = Store()
 class Header(BaseModel):
     tipo: str = ""
     calidad: str = ""
+    anio: str = ""
     etiquetas: str = ""
     paginas: str = ""
 
@@ -198,7 +201,7 @@ def api_models(request: Request):
     public = is_public(request)
     return {"public": public, "versions": [] if public else list(versions()), "loaded": {} if public else store.status(),
             "webgpu": webgpu_versions(), "hf": HF_REPOS, "fields": HEADER_FIELDS,
-            "tipos": TIPOS, "calidades": CALIDADES, "paginas": PAGINAS}
+            "tipos": TIPOS, "calidades": CALIDADES, "paginas": PAGINAS, "anios": ANIOS}
 
 
 _curves = {"at": 0, "data": None}
@@ -208,7 +211,7 @@ _curves = {"at": 0, "data": None}
 def api_curves():
     """Loss histories for the intro: the newest checkpoint's trainer_state.json per run (final/ has none), or, for runs
     whose checkpoints were deleted (v0, v1), the trainer's log dicts in runs/<v>.log, placed by epoch fraction."""
-    if time.time() - _curves["at"] > 600:
+    if time.time() - _curves["at"] > 60:
         out = {}
         for run in sorted(ROOT.glob("runs/v*/")):
             cks = sorted(run.glob("checkpoint-*/trainer_state.json"), key=lambda p: int(p.parent.name.split("-")[1]))
@@ -221,7 +224,7 @@ def api_curves():
                 continue
             out[run.name] = {"train": [[x["step"], round(x["loss"], 4)] for x in h if "loss" in x],
                              "eval": [[x["step"], round(x["eval_loss"], 4)] for x in h if "eval_loss" in x],
-                             "max_steps": max_steps, "tokens_per_step": 16 * 4096}
+                             "max_steps": max_steps, "tokens_per_step": 16 * 4096, "live": live_progress(run.name)}
         _curves.update(at=time.time(), data=out)
     return _curves["data"]
 
@@ -231,7 +234,7 @@ LOG_DICT_RE = re.compile(r"\{'(?:loss|eval_loss)': '[^}]*\}")
 
 def curves_from_log(name):
     """trainer_state-like history from the console logs (sparser: only what the terminal captured)."""
-    logs = [ROOT / f"runs/{name}.log", ROOT / f"runs/restart_{name}.log"]
+    logs = [ROOT / f"runs/{name}.log", ROOT / f"runs/restart_{name}.log", ROOT / f"runs/{name}.vast.log"]
     text = "\n".join(p.read_text(errors="replace").replace("\r", "\n") for p in logs if p.exists())
     # the training bar ("| 123/4219 [... 12.3s/it]") runs at seconds per step; dataset map and eval bars at it/s
     m = re.findall(r"\| \d+/(\d+) \[[^\]]*s/it\]", text)
@@ -245,6 +248,21 @@ def curves_from_log(name):
         h.append(d)
     h.sort(key=lambda x: x["step"])
     return h, max_steps
+
+
+def live_progress(name):
+    """Last training bar of a run whose Vast log (copied every minute while it trains) changed in the last 5 min."""
+    log = ROOT / f"runs/{name}.vast.log"
+    if not log.exists() or time.time() - log.stat().st_mtime > 300 or (ROOT / f"runs/{name}/final").exists():
+        return None
+    with log.open("rb") as f:
+        f.seek(max(0, log.stat().st_size - 20000))
+        bars = re.findall(r"\| (\d+)/(\d+) \[[^<\]]*<([0-9:]+), *[0-9.]+s/it\]", f.read().decode(errors="replace"))
+    if not bars:
+        return None
+    step, total, left = bars[-1]
+    secs = sum(int(x) * 60 ** i for i, x in enumerate(reversed(left.split(":"))))
+    return {"step": int(step), "max_steps": int(total), "eta": int(log.stat().st_mtime + secs)}
 
 
 # ---------------------------------------------------------------- in-browser generation (WebLLM)
