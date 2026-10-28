@@ -505,26 +505,23 @@ async function stats() {
   }
   $("#s-hist").innerHTML = svg;
 
-  // threads per year, stacked by source: the archive is a 2019–2020 block, the crawl covers 2003–2026
-  const ys = {};
-  for (const r of s.years) if (r.year) (ys[r.year] ??= {})[r.source] = r.n;
-  const yk = Object.keys(ys).map(Number).sort((a, b) => a - b), ym = Math.max(...yk.map((y) => Object.values(ys[y]).reduce((a, b) => a + b, 0)));
+  // threads per year in the 2026 crawl: one selection (long posts) over 2003–2026. The archive is every thread of a
+  // 2019–2020 id range, so drawing it in would show the sampling, not the forum
+  const archive = s.years.filter((r) => r.source === "archive").reduce((a, r) => a + r.n, 0);
+  const yk = Object.keys(s.crawl_years), ym = Math.max(...Object.values(s.crawl_years));
   const yw = (600 - 2 * (yk.length - 1)) / yk.length;
   let ysvg = `<line x1="0" y1="118.5" x2="600" y2="118.5"/>`;
   yk.forEach((y, i) => {
-    let top = 118;
-    const x = i * (yw + 2);
-    for (const [src, cls] of [["archive", "b"], ["public", "m"], ["crawl-2026", ""]]) {
-      const n = ys[y][src] ?? 0, h = (100 * n) / ym;
-      if (n) ysvg += `<rect class="${cls}" x="${x}" y="${top - h}" width="${yw}" height="${h}"><title>${y} · ${SOURCES[src]}: ${fmt(n)} hilos</title></rect>`;
-      top -= h;
-    }
-    if (y % 5 === 0 || i === 0 || i === yk.length - 1) ysvg += `<text x="${x + yw / 2}" y="134" text-anchor="middle">${y}</text>`;
+    const n = s.crawl_years[y], h = (100 * n) / ym, x = i * (yw + 2);
+    ysvg += `<rect x="${x}" y="${118 - h}" width="${yw}" height="${h}"><title>${y}: ${fmt(n)} hilos</title></rect>`;
+    if (y % 5 === 0 || i === 0) ysvg += `<text x="${x + yw / 2}" y="134" text-anchor="middle">${y}</text>`;
   });
+  $("#s-years-note").textContent = `Aparte, el archivo: ${fmt(archive)} hilos de 2019–2020, todos los de su rango de ids, sin filtrar por longitud.`;
   $("#s-years").innerHTML = ysvg;
 
   const porder = ["1", "2", "3-5", "6-10", "11-30", "31+"];
-  const pages = s.pages.sort((a, b) => porder.indexOf(a.pages_bucket) - porder.indexOf(b.pages_bucket));
+  // the 2026 crawl kept only the long posts, so its threads have no page count ("unknown")
+  const pages = s.pages.filter((p) => p.pages_bucket !== "unknown").sort((a, b) => porder.indexOf(a.pages_bucket) - porder.indexOf(b.pages_bucket));
   const pm = Math.max(...pages.map((p) => p.n));
   $("#s-pages").innerHTML = pages.map((p) => row(p.pages_bucket, `<div class="seg" style="width:${(100 * p.n) / pm}%"></div>`, `<b>${fmt(p.n)}</b>`)).join("");
 }

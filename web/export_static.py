@@ -16,6 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 INDEX = ROOT / "data/web/index.sqlite"
+CRAWL_ALL = ROOT / "data/processed/crawl-2026-all/docs.jsonl"
 OUT = ROOT / "web/static/data"
 
 
@@ -91,7 +92,14 @@ def stats():
              if "_total_mtok" in (s := json.loads(p.read_text()))}
     mixes["v3"] = mix_v2_stats(ROOT / "data/mix/v3/summary.json")
     return {"total": dict(total), "by_tipo_calidad": by, "posts_hist": hist, "pages": pages, "years": years,
-            "mixes": mixes}
+            "crawl_years": crawl_years(), "mixes": mixes}
+
+
+def crawl_years():
+    """Threads per OP year in the whole 2026 crawl: the index files 2019–2020 ones under the archive, which has them too."""
+    with CRAWL_ALL.open() as f:
+        c = Counter(json.loads(line)["year"] for line in f)
+    return {y: c[y] for y in sorted(y for y in c if y)}
 
 
 MIX_V2_POOLS = {"stories": "historias (×2)", "conversation": "hilos del crawl 2026", "archive_conversation": "hilos del archivo",
