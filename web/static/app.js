@@ -492,7 +492,7 @@ async function stats() {
   $("#s-mix-tabs").onclick = (e) => { const b = e.target.closest("button"); if (b) showMix(b.textContent); };
   if (names.length) showMix(names[names.length - 1]);
 
-  // posts per thread: the archive keeps at most 30 posts per thread
+  // posts per thread, archive only: it keeps up to 30 posts per thread, the crawl only the long ones
   const top = Math.max(...s.posts_hist.map((r) => r.n_posts));
   const hist = Array(top + 1).fill(0);
   for (const r of s.posts_hist) hist[r.n_posts] += r.n;
