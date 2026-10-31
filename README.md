@@ -108,10 +108,11 @@ scripts/gpu_train.sh .venv-train/bin/python train.py --data data/mix/<name> --ou
 ### Web
 
 ```sh
-.venv-train/bin/python -m uvicorn web.app:app --host 0.0.0.0 --port 7862
+docker compose -f deploy/web/compose.yaml up -d --build   # what runs: 127.0.0.1 + tailnet only, restart unless-stopped
+.venv-train/bin/python -m uvicorn web.app:app --host 127.0.0.1 --port 7862   # local dev
 ```
 
-Needs `web/build_index.py` once (archive index) and `data/web/mlc/<v>` for browser versions. WebLLM's runtime and the Gemma 3 WebGPU kernels go in `web/static/vendor/` (not in Git). `systemd/forocoches-web.service` is the unit we run.
+Needs `web/build_index.py` once (archive index) and `data/web/mlc/<v>` for browser versions. WebLLM's runtime and the Gemma 3 WebGPU kernels go in `web/static/vendor/` (not in Git).
 
 ### Tests
 
