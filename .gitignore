@@ -35,3 +35,6 @@ web/static/vendor/
 /AGENTS.md
 /docs/OPERATIONS-HISTORY.md
 /docs/NOVEL-PILOT.md
+
+# Local systemd units (deployment-specific)
+/systemd/

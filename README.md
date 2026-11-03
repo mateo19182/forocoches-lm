@@ -53,7 +53,7 @@ TÍTULO: Lo que me ha pasado hoy en el Mercadona +tocho
 | `scripts/eval_ppl.py`, `scripts/sample.py`, `scripts/check_packing.py` | evaluation |
 | `scripts/export_webllm.py`, `web/` | browser weights and the site |
 | `scripts/bench/` | attention / LR / slowdown benchmarks from the v1–v2 investigation |
-| `systemd/` | example user units (crawler, monitors, web); edit paths before use |
+| `systemd/` | local user units (crawler, monitors, web); ignored by Git because they hold deployment paths |
 | `tests/` | 103 unit tests on synthetic fixtures, plus optional dependency checks |
 | `docs/` | [NEXT-RUN.md](docs/NEXT-RUN.md), [DATA-WISHLIST.md](docs/DATA-WISHLIST.md), [RELEASING.md](docs/RELEASING.md) |
 
