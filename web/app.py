@@ -15,7 +15,7 @@ from pathlib import Path
 
 import torch
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from transformers import AutoModelForCausalLM, AutoTokenizer, StoppingCriteria, TextIteratorStreamer
@@ -342,6 +342,23 @@ def api_generated_one(gid: int):
 # ---------------------------------------------------------------- static
 
 app.mount("/static", StaticFiles(directory=ROOT / "web/static"), name="static")
+
+
+SITE = "https://forocoches.m19182.dev"
+
+
+@app.get("/robots.txt")
+def robots():
+    # one page (hash-routed); /api and /mlc are JSON and model weights, not content to index
+    body = f"User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /mlc/\n\nSitemap: {SITE}/sitemap.xml\n"
+    return PlainTextResponse(body, headers={"Cache-Control": "public, max-age=86400"})
+
+
+@app.get("/sitemap.xml")
+def sitemap():
+    body = ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+            f"  <url><loc>{SITE}/</loc></url>\n</urlset>\n")
+    return Response(body, media_type="application/xml", headers={"Cache-Control": "public, max-age=86400"})
 
 
 @app.get("/favicon.ico")
